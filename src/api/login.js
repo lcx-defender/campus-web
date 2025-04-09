@@ -14,3 +14,8 @@ export const getCodeImg = () => {
 export const userInfoService = () => {
   return request.get('/user/getSelfInfo');
 }
+
+// 退出登录请求
+export const logout = () => {
+  return request.post('/user/logout');
+};

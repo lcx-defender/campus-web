@@ -5,3 +5,8 @@ import request from '@/utils/request.js';
 export const userInfoService = () => {
     return request.get('/user/getSelfInfo');
 }
+
+// 修改自己密码
+export const updatePasswordService = (data) => {
+    return request.put('/user/updatePassword', data);
+}

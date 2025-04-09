@@ -40,6 +40,12 @@ const constantRoutes = [
   {
     path: '/service',
     component: () => import('@/views/service/layout.vue'), // 服务组件
+    children: [
+      {
+        path: '/user/selfInfo',
+        component: () => import('@/views/service/personalCenter.vue'), // 用户信息组件
+      }
+    ]
   }
 ];
 

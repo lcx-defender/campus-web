@@ -1,9 +1,10 @@
+// user.js
 import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    userInfo: {},
-    token: ''
+    userInfo: null,
+    token: null
   }),
   actions: {
     setToken(token) {
