@@ -10,3 +10,23 @@ export const userInfoService = () => {
 export const updatePasswordService = (data) => {
     return request.put('/user/updatePassword', data);
 }
+
+// 管理员修改用户密码
+export const resetUserPasswordService = (data) => {
+    return request.put('/user/resetPassword', data);
+}
+
+// 新增教师用户
+export const addTeacherService = (data) => {
+    return request.post('/user/addTeacher', data);
+}
+
+// 新增学生用户
+export const addStudentService = (data) => {
+    return request.post('/user/addStudent', data);
+}
+
+// 新增系统用户
+export const addUserService = (data) => {
+    return request.post('/user/addUser', data);
+}

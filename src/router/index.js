@@ -1,35 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-// 引入首页组件
-import homeLayout from '@/views/home/layout.vue';
-
 // 公共路由
 const constantRoutes = [
   {
     path: '/',
     name: 'Home',
-    component: homeLayout, // 首页组件
+    component: () => import('@/views/home/layout.vue'), // 首页组件
     redirect: '/home', // 重定向到/home
     children: [
         {
             path: '/home',
-            component: () => import('@/components/home/index.vue'), // 首页组件
+            component: () => import('@/views/home/index.vue'), // 首页组件
         },
         {
             path: '/apply',
-            component: () => import('@/components/home/apply.vue'), // 申请组件
+            component: () => import('@/views/home/apply.vue'), // 申请组件
         },
         {
             path: '/schools',
-            component: () => import('@/components/home/schools.vue'), // 入驻学校组件
-        },
-        {
-            path: 'apply',
-            component: () => import('@/components/home/apply.vue'), // 申请使用组件
+            component: () => import('@/views/home/schools.vue'), // 入驻学校组件
         },
         {
           path: '/about',
-          component: () => import('@/components/home/about.vue'), // 关于我们组件
+          component: () => import('@/views/home/about.vue'), // 关于我们组件
         }
     ]
   },
@@ -39,7 +32,13 @@ const constantRoutes = [
   },
   {
     path: '/service',
+    name: 'Service',
     component: () => import('@/views/service/layout.vue'), // 服务组件
+    redirect: '/user/selfInfo',
+    meta: {
+      title: '个人中心',
+      icon: 'el-icon-user'
+    },
     children: [
       {
         path: '/user/selfInfo',
@@ -49,9 +48,19 @@ const constantRoutes = [
   }
 ];
 
+// 动态路由，基于用户权限动态去加载
+export const dynamicRoutes = [];
+
 const router = createRouter({
   history: createWebHistory(),
   routes: constantRoutes, // 修正为 routes
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  },
 });
 
 export default router;

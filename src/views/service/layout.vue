@@ -66,12 +66,6 @@ const handleCommand = (command) => {
         <el-aside width="200px" class="menu-bar">
             <div class="el-aside__logo">智慧迎新平台</div>
             <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
-                <el-menu-item index="/home">
-                    <el-icon>
-                        <House />
-                    </el-icon>
-                    <span>首页</span>
-                </el-menu-item>
                 <el-menu-item index="/user/selfInfo">
                     <el-icon>
                         <UserFilled />
