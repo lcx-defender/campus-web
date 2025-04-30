@@ -10,18 +10,16 @@ const usePermissionStore = defineStore('permission',
   {
     state: () => ({
       routes: [],
-      addRoutes: [],
-      defaultRoutes: [],
+      dynamicRoutes: [],
       topbarRouters: [],
       sidebarRouters: []
     }),
     actions: {
       setRoutes(routes) {
-        this.addRoutes = routes
         this.routes = constantRoutes.concat(routes)
       },
-      setDefaultRoutes(routes) {
-        this.defaultRoutes = constantRoutes.concat(routes)
+      setDynamicRoutes(routes) {
+        this.dynamicRoutes = routes
       },
       setTopbarRoutes(routes) {
         this.topbarRouters = routes
@@ -33,12 +31,13 @@ const usePermissionStore = defineStore('permission',
         return new Promise(resolve => {
           // 向后端请求路由数据
           getRouters().then(res => {
-            const sdata = JSON.parse(JSON.stringify(res.data))
+            console.log('后端获取的路由数据', res.data)
             const rdata = JSON.parse(JSON.stringify(res.data))
             const defaultData = JSON.parse(JSON.stringify(res.data))
+            // 
             const serviceRoute = router.getRoutes().find(route => route.path === '/service');
-            const sidebarRoutes = filterAsyncRouter(sdata)
-            const rewriteRoutes = filterAsyncRouter(rdata, false, true)
+
+            const sidebarRoutes = filterAsyncRouter(rdata)
             const defaultRoutes = filterAsyncRouter(defaultData)
             const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
             this.setSidebarRouters(constantRoutes.concat(sidebarRoutes))

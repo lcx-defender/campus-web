@@ -2,30 +2,30 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user.js';
-import { updatePasswordService } from '@/api/user.js';
+import { updatePasswordService, userInfoService } from '@/api/user.js';
 import router from '@/router';
 
 const userStore = useUserStore();
 // 用户信息
 
-const userInfo = userStore.$state.userInfo; // 从 store 中获取用户信息
-console.log('数据类型:', typeof userInfo);
-console.log('个人中心:', userInfo);
-
+const userInfo = ref({});
 // 编辑表单
-const editForm = ref({
-    nickname: userInfo.nickname,
-    phone: userInfo.phone,
-    email: userInfo.email,
-    gender: '女',
-});
-
+const editForm = ref({});
 // 修改密码表单
 const passwordForm = ref({
     oldPassword: '',
     newPassword: '',
     confirmPassword: '',
 });
+
+const getSelfInfo = async () => {
+    // 获取用户信息
+    let res = await userInfoService();
+    userInfo.value = res.data;
+    editForm.value = res.data;
+};
+getSelfInfo();
+console.log("用户信息", userInfo.value);
 
 // 当前激活的 Tab
 const activeTab = ref('info');
@@ -38,10 +38,10 @@ const saveInfo = () => {
 
 // 重置基本资料
 const resetInfo = () => {
-    editForm.value.nickname = userInfo.nickname;
-    editForm.value.phone = userInfo.phone;
-    editForm.value.email = userInfo.email;
-    editForm.value.gender = '女';
+    editForm.value.nickname = userInfo.value.nickname;
+    editForm.value.phone = userInfo.value.phone;
+    editForm.value.email = userInfo.value.email;
+    editForm.value.sex = userInfo.value.sex;
     ElMessage.info('基本资料已重置');
 };
 
@@ -63,8 +63,6 @@ const resetPassword = () => {
     passwordForm.value.confirmPassword = '';
     ElMessage.info('密码表单已重置');
 };
-
-
 </script>
 <template>
     <div class="personal-center">
@@ -73,13 +71,14 @@ const resetPassword = () => {
             <el-col :span="8">
                 <el-card class="info-card">
                     <div class="info-header">
-                        <el-avatar :src="userInfo.avatar || defaultAvatar" size="large" />
+                        <el-avatar :src="userInfo.avatar" size="large" />
                         <h3>{{ userInfo.nickname }}</h3>
                     </div>
                     <ul class="info-list">
                         <li><i class="el-icon-user"></i> 用户名称：{{ userInfo.nickname }}</li>
                         <li><i class="el-icon-phone"></i> 手机号码：{{ userInfo.phone }}</li>
                         <li><i class="el-icon-message"></i> 用户邮箱：{{ userInfo.email }}</li>
+                        <!-- 此处使用一个判断，如果用户类型是学生则显示 学校、院系、专业、班级，否则显示 部门 -->
                         <li><i class="el-icon-office-building"></i> 所属部门：{{ userInfo.department }}</li>
                     </ul>
                 </el-card>
@@ -102,9 +101,10 @@ const resetPassword = () => {
                                     <el-input v-model="editForm.email" placeholder="请输入邮箱" />
                                 </el-form-item>
                                 <el-form-item label="性别">
-                                    <el-radio-group v-model="editForm.gender">
-                                        <el-radio label="男">男</el-radio>
-                                        <el-radio label="女">女</el-radio>
+                                    <el-radio-group v-model="editForm.sex">
+                                        <el-radio label="男" :value="'0'">男</el-radio>
+                                        <el-radio label="女" :value="'1'">女</el-radio>
+                                        <el-radio label="未知" :value="'2'">未知</el-radio>
                                     </el-radio-group>
                                 </el-form-item>
                                 <el-form-item>

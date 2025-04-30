@@ -10,19 +10,18 @@ const constantRoutes = [
     children: [
         {
             path: '/home',
+            meta: {title: '首页'},
             component: () => import('@/views/home/index.vue'), // 首页组件
         },
         {
             path: '/apply',
+            meta: {title: '申请使用'},
             component: () => import('@/views/home/apply.vue'), // 申请组件
         },
         {
             path: '/schools',
+            meta: {title: '入驻学校'},
             component: () => import('@/views/home/schools.vue'), // 入驻学校组件
-        },
-        {
-          path: '/about',
-          component: () => import('@/views/home/about.vue'), // 关于我们组件
         }
     ]
   },
@@ -35,13 +34,13 @@ const constantRoutes = [
     name: 'Service',
     component: () => import('@/views/service/layout.vue'), // 服务组件
     redirect: '/user/selfInfo',
-    meta: {
-      title: '个人中心',
-      icon: 'el-icon-user'
-    },
     children: [
       {
         path: '/user/selfInfo',
+        meta: {
+          title: '个人中心',
+          icon: 'el-icon-user'
+        },
         component: () => import('@/views/service/personalCenter.vue'), // 用户信息组件
       }
     ]

@@ -42,6 +42,8 @@
 }
 
 .about-section h2 {
+  text-align: center; /* 居中对齐 */
+  margin: 0 auto; /* 可选：确保水平居中 */
   font-size: 24px;
   color: #333;
   margin-bottom: 16px;

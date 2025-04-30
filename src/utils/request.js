@@ -34,22 +34,14 @@ service.interceptors.response.use(
             return result.data;
         }
         ElMessage.error(result.data.message?result.data.message:'服务异常')
+        if(result.data.code===401) {
+            router.push('/login');
+        }
         // 异步操作的状态改为失败
         return Promise.reject(result.data);
     }, 
     err => {
-        if (err.code === 'ECONNABORTED') {
-            ElMessage.error('请求超时，请稍后重试');
-        } else if (err.response) {
-            if (err.response.status === 401) {
-                ElMessage.error('请先登录');
-                router.push('/login');
-            } else {
-                ElMessage.error(err.response.data?.msg || '服务异常');
-            }
-        } else {
-            ElMessage.error('网络错误，请检查您的网络连接');
-        }
+        console.log('错误信息', err);
         return Promise.reject(err);
     }
 );
