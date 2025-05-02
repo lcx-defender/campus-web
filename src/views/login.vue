@@ -1,11 +1,12 @@
 <script setup>
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { useUserStore } from '@/store/user.js';
 import {useRouter} from 'vue-router';
+import { loginByUsername, getCodeImg } from "@/api/login.js";
+import { useUserStore } from '@/store/user.js';
 
-const router = useRouter();
 const userStore = useUserStore();
+const router = useRouter();
 const codeUrl = ref("");
 // 加载状态
 const loading = ref(false);
@@ -24,7 +25,7 @@ const loginRules = {
   code: [{ required: true, trigger: "change", message: "请输入验证码" }]
 };
 
-import { loginByUsername, getCodeImg } from "@/api/login.js";
+
 
 // 获取登录验证码
 const getCode = async () => {

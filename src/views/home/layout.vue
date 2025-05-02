@@ -6,7 +6,7 @@ const router = useRouter();
 
 // 动态获取当前路由的子路由
 const menuItems = computed(() => {
-  const currentRoute = router.options.routes.find(r => r.path === '/');
+  const currentRoute = router.options.routes.find(r => r.path === '/index');
   return currentRoute?.children || [];
 });
 </script>
@@ -32,11 +32,15 @@ const menuItems = computed(() => {
           >
             <router-link :to="item.path">{{ item.meta?.title || item.path }}</router-link>
           </el-menu-item>
+          <!-- 管理端 -->
+          <el-menu-item index="/service">
+            <span>管理端</span>
+          </el-menu-item>
           <!-- 学生移动端作为下载链接 -->
           <el-menu-item>
             <a href="https://greet-freshman.oss-cn-shanghai.aliyuncs.com/default-avatar.png" download
               style="color: white; text-decoration: none;">
-              学生移动端
+              学生移动端下载链接
             </a>
           </el-menu-item>
           <el-menu-item index="/login">

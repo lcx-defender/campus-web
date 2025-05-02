@@ -16,6 +16,17 @@ export const resetUserPasswordService = (data) => {
     return request.put('/user/resetPassword', data);
 }
 
+// 修改用户自己信息
+export const updateUserInfoService = (data) => {
+    return request.put('/user/updateSelfInfo', data);
+}
+
+// 管理员修改其他用户信息
+export const updateUserInfoByAdminService = (data) => {
+    return request.put('/user/updateUser', data);
+}
+
+
 // 新增教师用户
 export const addTeacherService = (data) => {
     return request.post('/user/addTeacher', data);

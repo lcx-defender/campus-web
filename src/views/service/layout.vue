@@ -15,9 +15,10 @@ import { useRouter } from 'vue-router';
 import { computed } from 'vue';
 import { useUserStore } from '@/store/user.js';
 import { logout, userInfoService } from '@/api/login.js';
+import pinia from '@/store';
+const userStore = useUserStore(pinia);
 
 const router = useRouter();
-const userStore = useUserStore();
 const userInfo = ref({});
 
 // 动态获取当前路由的子路由
@@ -27,17 +28,16 @@ const menuItems = computed(() => {
 });
 
 const getUserInfo = async () => {
-    try {
-        const response = await userInfoService();
-        userStore.setUserInfo(response.data);
-        userInfo.value = response.data;
-        console.log('调用过程用户信息:', response.data);
-    } catch (error) {
-        console.error('获取用户信息失败:', error);
-    }
+    const response = await userInfoService();
+    console.log('前端接收的用户信息:', response);
+    userInfo.value = response.data;
+    userStore.setUserInfo(response.data); // 使用 action 方法设置用户信息
+    console.log('后端返回用户信息:', response.data);
+    console.log('布局界面用户信息:', userInfo.value);
+    console.log('存入store的用户信息:', userStore.userInfo);
 };
 getUserInfo();
-console.log('布局界面用户信息:', userInfo.value);
+
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
@@ -72,18 +72,9 @@ const handleCommand = (command) => {
         <!-- 左侧菜单 -->
         <el-aside width="200px" class="menu-bar">
             <div class="el-aside__logo">智慧迎新平台</div>
-            <el-menu 
-                active-text-color="#ffd04b" 
-                background-color="#2a3f54" 
-                text-color="#fff" 
-                router
-            >
+            <el-menu active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
                 <!-- 动态生成菜单项 -->
-                <el-menu-item 
-                    v-for="item in menuItems" 
-                    :key="item.path" 
-                    :index="item.path"
-                >
+                <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
                     <el-icon v-if="item.meta?.icon">
                         <component :is="item.meta.icon" />
                     </el-icon>
@@ -167,8 +158,10 @@ const handleCommand = (command) => {
 }
 
 .el-menu-item {
-    background-color: #2a3f54; /* 默认深蓝色背景 */
-    color: #fff; /* 默认文字颜色 */
+    background-color: #2a3f54;
+    /* 默认深蓝色背景 */
+    color: #fff;
+    /* 默认文字颜色 */
     font-size: 16px;
     padding: 12px 20px;
     transition: background-color 0.3s, color 0.3s;
@@ -177,13 +170,17 @@ const handleCommand = (command) => {
 }
 
 .el-menu-item:hover {
-    background-color: #406182; /* 比未选中颜色稍深，但比选中颜色浅 */
-    color: #ffd04b; /* 悬停时文字颜色为亮黄色 */
+    background-color: #406182;
+    /* 比未选中颜色稍深，但比选中颜色浅 */
+    color: #ffd04b;
+    /* 悬停时文字颜色为亮黄色 */
 }
 
 .el-menu-item.is-active {
-    background-color: #406182; /* 比未选中颜色稍深的蓝色 */
-    color: #ffd04b; /* 选中时文字颜色为亮黄色 */
+    background-color: #406182;
+    /* 比未选中颜色稍深的蓝色 */
+    color: #ffd04b;
+    /* 选中时文字颜色为亮黄色 */
 }
 
 .el-menu-item .el-icon {

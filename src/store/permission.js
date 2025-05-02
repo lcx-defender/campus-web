@@ -1,28 +1,19 @@
 import { getRouters } from '@/api/menu.js'
 import { defineStore } from 'pinia'
 import { router, constantRoutes, dynamicRoutes } from '@/router/index.js'
-import { auth } from '@/utils/auth.js'
 
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('@/views/**/*.vue')
 
-const usePermissionStore = defineStore('permission',
+export const usePermissionStore = defineStore('permission',
   {
     state: () => ({
       routes: [],
-      dynamicRoutes: [],
-      topbarRouters: [],
       sidebarRouters: []
     }),
     actions: {
       setRoutes(routes) {
         this.routes = constantRoutes.concat(routes)
-      },
-      setDynamicRoutes(routes) {
-        this.dynamicRoutes = routes
-      },
-      setTopbarRoutes(routes) {
-        this.topbarRouters = routes
       },
       setSidebarRouters(routes) {
         this.sidebarRouters = routes
@@ -32,41 +23,37 @@ const usePermissionStore = defineStore('permission',
           // 向后端请求路由数据
           getRouters().then(res => {
             console.log('后端获取的路由数据', res.data)
+            const sdata = JSON.parse(JSON.stringify(res.data))
             const rdata = JSON.parse(JSON.stringify(res.data))
-            const defaultData = JSON.parse(JSON.stringify(res.data))
-            // 
+
+            // path拼接不完整(此处我不想在渲染菜单栏时拼接，权且不使用)
+            const sidebarRoutes = filterAsyncRouter(sdata)
+
+            // 将多层级的子路由扁平化，用于动态添加到 Vue Router,path拼接完整
+            const rewriteRoutes = filterAsyncRouter(rdata, false, true)
+             
+          
             const serviceRoute = router.getRoutes().find(route => route.path === '/service');
-
-            const sidebarRoutes = filterAsyncRouter(rdata)
-            const defaultRoutes = filterAsyncRouter(defaultData)
-            const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
-            this.setSidebarRouters(constantRoutes.concat(sidebarRoutes))
-            this.setDefaultRoutes(sidebarRoutes)
-            this.setTopbarRoutes(defaultRoutes)
-
             if (serviceRoute) {
-              asyncRoutes.forEach(route => {
-                serviceRoute.children.push(route); // 动态添加到 /service 的子路由
+              rewriteRoutes.forEach(route => {
+                router.addRoute('service', route); // 动态添加到 /service 的子路由
               });
             }
-      
-            this.setRoutes(asyncRoutes);
-            resolve(asyncRoutes);
+            // 侧边栏是以service为父路由的
+            this.setSidebarRouters(serviceRoute);
+            
+            this.setRoutes(rewriteRoutes);
+            resolve(rewriteRoutes);
           })
         })
       }
     },
     persist: {
-      enabled: true, // 启用持久化
-      strategies: [
-        {
-          key: 'router', // 存储的键名
-          storage: localStorage, // 使用 localStorage 存储
-        }
-      ]
+      key: 'permission-store',
+      storage: localStorage,
+      paths: ['routes', 'sidebarRouters']
     }
-  }
-)
+});
 
 // 遍历后台传来的路由字符串，转换为组件对象
 function filterAsyncRouter (asyncRouterMap, lastRouter = false , type = false) {
@@ -143,4 +130,4 @@ export const loadView = (view) => {
   return res
 }
 
-export default usePermissionStore
+

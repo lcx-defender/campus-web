@@ -2,11 +2,11 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user.js';
-import { updatePasswordService, userInfoService } from '@/api/user.js';
-import router from '@/router';
+import { updatePasswordService, userInfoService, updateUserInfoService } from '@/api/user.js';
+import {router} from '@/router/index.js';
+import pinia from '@/store';
 
 const userStore = useUserStore();
-// 用户信息
 
 const userInfo = ref({});
 // 编辑表单
@@ -19,20 +19,24 @@ const passwordForm = ref({
 });
 
 const getSelfInfo = async () => {
-    // 获取用户信息
-    let res = await userInfoService();
+    const res = await userInfoService();
+    console.log('前端接收的用户信息:', res);
     userInfo.value = res.data;
     editForm.value = res.data;
+    console.log("个人中心", userInfo.value);
 };
 getSelfInfo();
-console.log("用户信息", userInfo.value);
 
 // 当前激活的 Tab
 const activeTab = ref('info');
 
 // 保存基本资料
-const saveInfo = () => {
-    // 给后端发送请求
+const saveInfo = async () => {
+    const res = await updateUserInfoService(editForm.value);
+    const response = await userInfoService();
+    console.log('前端接收的用户信息:', response.data);
+    userStore.userInfo = response.data; // 更新 store 中的用户信息
+    userInfo.value = response.data;
     ElMessage.success('基本资料已保存');
 };
 
@@ -78,7 +82,10 @@ const resetPassword = () => {
                         <li><i class="el-icon-user"></i> 用户名称：{{ userInfo.nickname }}</li>
                         <li><i class="el-icon-phone"></i> 手机号码：{{ userInfo.phone }}</li>
                         <li><i class="el-icon-message"></i> 用户邮箱：{{ userInfo.email }}</li>
+                        <li><i class="el-icon-s-custom"></i> 用户类型：{{ userInfo.userType }}</li>
+                        <li><i class="el-icon-identity"></i> 身份证号：{{ userInfo.identity }}</li>
                         <!-- 此处使用一个判断，如果用户类型是学生则显示 学校、院系、专业、班级，否则显示 部门 -->
+                         
                         <li><i class="el-icon-office-building"></i> 所属部门：{{ userInfo.department }}</li>
                     </ul>
                 </el-card>

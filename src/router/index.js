@@ -1,10 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 // 公共路由
-const constantRoutes = [
+export const constantRoutes = [
   {
-    path: '/',
-    name: 'Home',
+    path: '/index',
     component: () => import('@/views/home/layout.vue'), // 首页组件
     redirect: '/home', // 重定向到/home
     children: [
@@ -27,11 +26,11 @@ const constantRoutes = [
   },
   {
     path: '/login',
-    component: () => import('@/views/login.vue'), // 登录组件
+    component: () => import('@/views/login.vue'),
   },
   {
     path: '/service',
-    name: 'Service',
+    name: 'service',
     component: () => import('@/views/service/layout.vue'), // 服务组件
     redirect: '/user/selfInfo',
     children: [
@@ -47,10 +46,10 @@ const constantRoutes = [
   }
 ];
 
-// 动态路由，基于用户权限动态去加载
+// 提前写的动态路由，交给 @/store/permission.js 处理
 export const dynamicRoutes = [];
 
-const router = createRouter({
+export const router = createRouter({
   history: createWebHistory(),
   routes: constantRoutes, // 修正为 routes
   scrollBehavior(to, from, savedPosition) {
@@ -61,5 +60,3 @@ const router = createRouter({
     }
   },
 });
-
-export default router;
