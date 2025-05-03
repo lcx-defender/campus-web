@@ -3,12 +3,12 @@ import { createRouter, createWebHistory } from 'vue-router';
 // 公共路由
 export const constantRoutes = [
   {
-    path: '/index',
+    path: '/',
     component: () => import('@/views/home/layout.vue'), // 首页组件
-    redirect: '/home', // 重定向到/home
+    redirect: '/index', // 重定向到/home
     children: [
         {
-            path: '/home',
+            path: '/index',
             meta: {title: '首页'},
             component: () => import('@/views/home/index.vue'), // 首页组件
         },
@@ -23,6 +23,16 @@ export const constantRoutes = [
             component: () => import('@/views/home/schools.vue'), // 入驻学校组件
         }
     ]
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error/401.vue'),
+    hidden: true
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import('@/views/error/404.vue'),
+    hidden: true
   },
   {
     path: '/login',

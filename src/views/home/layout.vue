@@ -6,7 +6,7 @@ const router = useRouter();
 
 // 动态获取当前路由的子路由
 const menuItems = computed(() => {
-  const currentRoute = router.options.routes.find(r => r.path === '/index');
+  const currentRoute = router.options.routes.find(r => r.path === '/');
   return currentRoute?.children || [];
 });
 </script>

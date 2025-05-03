@@ -12,32 +12,34 @@ import {
 import { ref } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { computed, onMounted  } from 'vue';
 import { useUserStore } from '@/store/user.js';
 import { logout, userInfoService } from '@/api/login.js';
-import pinia from '@/store';
-const userStore = useUserStore(pinia);
-
+import { usePermissionStore } from '@/store/permission.js';
+import MenuItem from '@/components/MenuItem.vue';
+const userStore = useUserStore();
+const permissionStore = usePermissionStore();
 const router = useRouter();
+
+// onMounted(() => {
+//     permissionStore.generateRoutes()
+// })
+const menuItems = computed(() => permissionStore.sidebarRouters?.children || [])
+console.log('menuItems', menuItems.value)
+console.log('布局页面的router', router.getRoutes())
+console.log('布局页面的sidebarRouters', permissionStore.sidebarRouters)
+const activeMenu = computed(() => location.pathname)
+
 const userInfo = ref({});
-
-// 动态获取当前路由的子路由
-const menuItems = computed(() => {
-    const currentRoute = router.options.routes.find(r => r.path === '/service');
-    return currentRoute?.children || [];
-});
-
 const getUserInfo = async () => {
     const response = await userInfoService();
     console.log('前端接收的用户信息:', response);
     userInfo.value = response.data;
     userStore.setUserInfo(response.data); // 使用 action 方法设置用户信息
-    console.log('后端返回用户信息:', response.data);
-    console.log('布局界面用户信息:', userInfo.value);
+    // console.log('布局界面用户信息:', userInfo.value);
     console.log('存入store的用户信息:', userStore.userInfo);
 };
 getUserInfo();
-
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
@@ -72,14 +74,19 @@ const handleCommand = (command) => {
         <!-- 左侧菜单 -->
         <el-aside width="200px" class="menu-bar">
             <div class="el-aside__logo">智慧迎新平台</div>
-            <el-menu active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
-                <!-- 动态生成菜单项 -->
+            <!-- <el-menu active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
+                
                 <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
                     <el-icon v-if="item.meta?.icon">
                         <component :is="item.meta.icon" />
                     </el-icon>
                     <span>{{ item.meta?.title || item.path }}</span>
                 </el-menu-item>
+            </el-menu> -->
+            <el-menu :default-active="activeMenu" active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
+                <template v-for="item in menuItems" :key="item.path">
+                    <MenuItem :item="item" />
+                </template>
             </el-menu>
         </el-aside>
 

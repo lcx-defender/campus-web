@@ -1,22 +1,21 @@
 // 构造动态路由
-import {router} from '@/router/index.js'
+import { router } from '@/router/index.js'
 import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { logout } from '@/api/login.js';
-import {useUserStore} from '@/store/user.js'
-import {usePermissionStore} from '@/store/permission.js'
-import pinia from '@/store';
-
+import { useUserStore } from '@/store/user.js'
+import { usePermissionStore } from '@/store/permission.js'
 
 NProgress.configure({ showSpinner: false });
-const whiteList = ['/login','/', '/home','/apply','/schools','/about']; // no redirect whitelist
+const whiteList = ['/login', '/', '/home', '/apply', '/schools', '/about']; // no redirect whitelist
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   console.log('路由跳转', to.path, from.path)
   NProgress.start()
   const userStore = useUserStore();
-  
+  const permissionStore = usePermissionStore();
+
   if (userStore.token) {
     /* has token*/
     if (to.path === '/login') {
@@ -25,34 +24,18 @@ router.beforeEach((to, from, next) => {
     } else if (whiteList.indexOf(to.path) !== -1) {
       next()
     } else {
-      // 如果有 token 但没有用户信息，则获取用户信息
-      if (!userStore.userInfo) {
-        userStore.fetchUserInfo()
-          .then(() => {
-            const permissionStore = usePermissionStore();
-            return permissionStore.generateRoutes();
-          })
-          .then((rewriteRoutes) => {
-            // 根据后端返回的路由动态挂载到 /service 的 children 下
-            const serviceRoute = router
-              .getRoutes()
-              .find((route) => route.path === '/service');
-            if (serviceRoute) {
-              rewriteRoutes.forEach((route) => {
-                router.addRoute('service',route); // 动态添加到 /service 的子路由
-              });
-            }
-            next({ ...to, replace: true }); // hack方法 确保路由更新后再跳转
-          })
-          .catch((err) => {
-            logout()
-              .then(() => {
-                ElMessage.error(err);
-                next({ path: '/' });
-              });
-          });
-      } else {
-        next()
+      try {
+        // 如果没有路由信息，加载路由
+        if (!permissionStore.hasRoutes) {
+          await permissionStore.generateRoutes();
+        }
+        next();
+      } catch (err) {
+        console.error('路由加载失败:', err);
+        logout();
+        ElMessage.error('路由加载失败，请重新登录');
+        userStore.setToken('');
+        next({ path: '/login' });
       }
     }
   } else {
