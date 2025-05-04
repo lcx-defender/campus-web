@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import {router} from '@/router/index.js';
 import { useUserStore } from '@/store/user.js';
+import { getToken } from '@/utils/token.js';
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8';
 // vite.config.js中配置代理
@@ -16,10 +17,10 @@ const service = axios.create(
 service.interceptors.request.use(
     config => {
         const userStore = useUserStore();
-        console.log('请求拦截器', userStore.token);
-        if(userStore.token) {
-            config.headers.Authorization = userStore.getToken();
-            console.log('请求头', config.headers.Authorization);
+        // console.log('请求拦截器', userStore.token);
+        if(getToken()) {
+            config.headers.Authorization = getToken();
+            console.log('请求头', getToken());
         }
         return config;
     }, error => {

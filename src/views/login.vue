@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus';
 import {useRouter} from 'vue-router';
 import { loginByUsername, getCodeImg } from "@/api/login.js";
 import { useUserStore } from '@/store/user.js';
+import { setToken } from '@/utils/token.js';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -25,8 +26,6 @@ const loginRules = {
   code: [{ required: true, trigger: "change", message: "请输入验证码" }]
 };
 
-
-
 // 获取登录验证码
 const getCode = async () => {
   let res = await getCodeImg();
@@ -38,9 +37,9 @@ getCode();
 // 登录函数
 const handleLogin = async () => {
   try {
-    let result = await loginByUsername(loginForm.value);
-    ElMessage.success(result.msg ? result.msg : '登录成功');
-    userStore.setToken(result.data);
+    let res = await loginByUsername(loginForm.value);
+    await setToken(res.data); // 设置token
+    ElMessage.success(res.message? res.message : '登录成功');
     // 登录成功后，跳转
     router.push({ path: "/service" });
   } catch (error) {

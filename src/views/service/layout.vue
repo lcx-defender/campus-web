@@ -13,31 +13,29 @@ import { ref } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { computed, onMounted  } from 'vue';
+
 import { useUserStore } from '@/store/user.js';
-import { logout, userInfoService } from '@/api/login.js';
 import { usePermissionStore } from '@/store/permission.js';
 import MenuItem from '@/components/MenuItem.vue';
-const userStore = useUserStore();
 const permissionStore = usePermissionStore();
 const router = useRouter();
-
-// onMounted(() => {
-//     permissionStore.generateRoutes()
-// })
-const menuItems = computed(() => permissionStore.sidebarRouters?.children || [])
-console.log('menuItems', menuItems.value)
 console.log('布局页面的router', router.getRoutes())
 console.log('布局页面的sidebarRouters', permissionStore.sidebarRouters)
-const activeMenu = computed(() => location.pathname)
-
+const menuItems = computed(() => {
+    // 从 router 中获取所有路由
+    const serviceRoute = router.getRoutes().find(route => route.path === '/service');
+    // 如果找到 /service 路由，返回其子路由；否则返回空数组
+    return serviceRoute?.children || [];
+});
+console.log('menuItems', menuItems.value)
+const activeMenu = computed(() => router.path)
+import { logout } from '@/api/login.js';
+import { userInfoService } from '@/api/user.js';
 const userInfo = ref({});
 const getUserInfo = async () => {
-    const response = await userInfoService();
-    console.log('前端接收的用户信息:', response);
-    userInfo.value = response.data;
-    userStore.setUserInfo(response.data); // 使用 action 方法设置用户信息
-    // console.log('布局界面用户信息:', userInfo.value);
-    console.log('存入store的用户信息:', userStore.userInfo);
+    const res = await userInfoService();
+    useUserStore().setUserInfo(res.data); // 更新 store 中的用户信息
+    userInfo.value = res.data;
 };
 getUserInfo();
 
@@ -51,15 +49,14 @@ const handleCommand = (command) => {
             cancelButtonText: '取消',
             type: 'warning',
         })
-            .then(async () => {
+            .then(async() => {
                 try {
-                    await logout(); // 调用后端退出接口
-                    userStore.setToken(''); // 清空 token
-                    router.push('/login'); // 跳转到登录页
-                    ElMessage.success('退出成功');
+                    let res = await logout(); // 调用后端退出接口
+                    ElMessage.success(res.message || '退出成功');
                 } catch (error) {
                     ElMessage.error('退出失败，请稍后重试');
                 }
+                router.push('/'); // 跳转到首页
             })
             .catch(() => {
                 ElMessage.info('已取消退出');
@@ -74,15 +71,7 @@ const handleCommand = (command) => {
         <!-- 左侧菜单 -->
         <el-aside width="200px" class="menu-bar">
             <div class="el-aside__logo">智慧迎新平台</div>
-            <!-- <el-menu active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
-                
-                <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
-                    <el-icon v-if="item.meta?.icon">
-                        <component :is="item.meta.icon" />
-                    </el-icon>
-                    <span>{{ item.meta?.title || item.path }}</span>
-                </el-menu-item>
-            </el-menu> -->
+        
             <el-menu :default-active="activeMenu" active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
                 <template v-for="item in menuItems" :key="item.path">
                     <MenuItem :item="item" />
@@ -110,12 +99,10 @@ const handleCommand = (command) => {
                     </template>
                 </el-dropdown>
             </el-header>
-
             <!-- 中间区域 -->
             <el-main>
                 <router-view></router-view>
             </el-main>
-
             <!-- 底部区域 -->
             <el-footer>智慧迎新平台 ©2025 Created by 星</el-footer>
         </el-container>

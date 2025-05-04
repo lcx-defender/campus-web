@@ -11,7 +11,7 @@ export const usePermissionStore = defineStore('permission',
     state: () => ({
       routes: [],
       sidebarRouters: [],
-      hasRoutes: false // 添加标记，表示是否已经加载过路由
+      hasRoutes: false,
     }),
     actions: {
       setRoutes(routes) {
@@ -20,55 +20,43 @@ export const usePermissionStore = defineStore('permission',
       setSidebarRouters(routes) {
         this.sidebarRouters = routes;
       },
-      setHasRoutes(hasRoutes) {
-        this.hasRoutes = hasRoutes;
-      },
-      generateRoutes() {
-        return new Promise(resolve => {
-          // 如果已经加载过路由，直接返回
-          if (this.hasRoutes) {
-            resolve(this.routes);
-            return;
-          }
+      async generateRoutes() {
+        const res = await getRouters();
+        // 向后端请求路由数据
+        console.log('后端获取的路由数据', res.data)
+        const sdata = JSON.parse(JSON.stringify(res.data))
+        const rdata = JSON.parse(JSON.stringify(res.data))
+        // 将多层级的子路由扁平化，用于动态添加到 Vue Router,path拼接完整
+        const sidebarRoutes = filterAsyncRouter(sdata, false, true)
+        const rewriteRoutes = filterAsyncRouter(rdata, false, true)
+        console.log('rewriteRoutes', rewriteRoutes)
+        console.log('加载动态路由前的完整路由', router.getRoutes())
+        const serviceRoute = router.getRoutes().find(route => route.path === '/service');
 
-          // 向后端请求路由数据
-          getRouters().then(res => {
-            console.log('后端获取的路由数据', res.data)
-            const sdata = JSON.parse(JSON.stringify(res.data))
-            const rdata = JSON.parse(JSON.stringify(res.data))
-            // 将多层级的子路由扁平化，用于动态添加到 Vue Router,path拼接完整
-            const sidebarRoutes = filterAsyncRouter(sdata, false, true)
-            const rewriteRoutes = filterAsyncRouter(rdata, false, true)
-            console.log('rewriteRoutes', rewriteRoutes)
-            console.log('sidebarRoutes', sidebarRoutes)
+        if (serviceRoute) {
+          // 先移除原有的service路由
+          router.removeRoute('service');
+          // 重新添加service路由，包含新的子路由
+          router.addRoute({
+            ...serviceRoute,
+            children: [...serviceRoute.children, ...sidebarRoutes]
+          });
+        }
 
-            const serviceRoute = router.getRoutes().find(route => route.path === '/service');
-
-            if (serviceRoute) {
-              // 先移除原有的service路由
-              router.removeRoute('service');
-              // 重新添加service路由，包含新的子路由
-              router.addRoute({
-                ...serviceRoute,
-                children: [...serviceRoute.children, ...sidebarRoutes]
-              });
-            }
-            serviceRoute.children = [...serviceRoute.children, ...sidebarRoutes]
-            // 侧边栏是以service为父路由的
-            this.setSidebarRouters(serviceRoute);
-            this.setRoutes(router.getRoutes());
-            this.setHasRoutes(true); // 标记路由已加载
-            console.log('store处理完时的完整路由', router.getRoutes());
-            resolve(rewriteRoutes);
-          })
-        })
+        // serviceRoute.children = [...serviceRoute.children, ...sidebarRoutes]
+        // 侧边栏是以service为父路由的
+        this.setSidebarRouters(serviceRoute);
+        this.setRoutes(router.getRoutes());
+        this.hasRoutes = true;
+        console.log('store处理完时的完整路由', router.getRoutes());
+        return this.routes
       }
     },
-    persist: {
-      key: 'permission-store',
-      storage: localStorage,
-      paths: ['routes', 'sidebarRouters', 'hasRoutes'] // 添加hasRoutes到持久化
-    }
+    // persist: {
+    //   key: 'permission-store',
+    //   storage: localStorage,
+    //   paths: ['routes', 'sidebarRouters', 'hasRoutes'] // 添加hasRoutes到持久化
+    // }
   });
 
 // 遍历后台传来的路由字符串，转换为组件对象
@@ -124,14 +112,14 @@ function filterChildren(childrenMap, parentPath = '') {
 
 export const loadView = (view) => {
   let res;
-  console.log('全部模块', modules)
-  console.log('当前模块', view)
+  // console.log('全部模块', modules)
+  // console.log('当前模块', view)
   for (const path in modules) {
     const dir = path.split('views/')[1].split('.vue')[0]
     if (dir === view) {
       res = modules[path];
-      console.log('当前模块路径', path);
-      console.log('当前模块component:', res);
+      // console.log('当前模块路径', path);
+      // console.log('当前模块component:', res);
       break;
     }
   }
