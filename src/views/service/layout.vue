@@ -1,6 +1,10 @@
 <script setup>
 import {
     Management,
+    Document,
+    Menu as IconMenu,
+    Location,
+    Setting,
     Promotion,
     UserFilled,
     User,
@@ -12,7 +16,7 @@ import {
 import { ref } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { computed, onMounted  } from 'vue';
+import { computed, onMounted } from 'vue';
 
 import { useUserStore } from '@/store/user.js';
 import { usePermissionStore } from '@/store/permission.js';
@@ -29,6 +33,15 @@ const menuItems = computed(() => {
 });
 console.log('menuItems', menuItems.value)
 const activeMenu = computed(() => router.path)
+const isCollapse = ref(false)
+const handleOpen = function (key, keyPath) {
+    console.log(key, keyPath);
+};
+
+const handleClose = function (key, keyPath) {
+    console.log(key, keyPath);
+};
+
 import { logout } from '@/api/login.js';
 import { userInfoService } from '@/api/user.js';
 const userInfo = ref({});
@@ -49,7 +62,7 @@ const handleCommand = (command) => {
             cancelButtonText: '取消',
             type: 'warning',
         })
-            .then(async() => {
+            .then(async () => {
                 try {
                     let res = await logout(); // 调用后端退出接口
                     ElMessage.success(res.message || '退出成功');
@@ -69,35 +82,55 @@ const handleCommand = (command) => {
     <!-- 整体布局 -->
     <el-container class="layout-container">
         <!-- 左侧菜单 -->
-        <el-aside width="200px" class="menu-bar">
-            <div class="el-aside__logo">智慧迎新平台</div>
-        
-            <el-menu :default-active="activeMenu" active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router>
-                <template v-for="item in menuItems" :key="item.path">
-                    <MenuItem :item="item" />
-                </template>
+        <el-aside :width="isCollapse ? '64px' : '200px'" class="menu-bar">
+            <!-- 动态 logo -->
+            <div class="el-aside__header">
+                <div class="el-aside__logo" :class="{ collapsed: isCollapse }">
+                    <template v-if="!isCollapse">智慧迎新平台</template>
+                    <template v-else>迎</template>
+                </div>
+            </div>
+            <!-- 菜单 -->
+            <el-menu :default-active="activeMenu" :collapse="isCollapse" @open="handleOpen" @close="handleClose"
+                active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router class="menu-content">
+                <MenuItem v-for="item in menuItems" :key="item.path" :item="item" />
             </el-menu>
+            <!-- 收缩/展开按钮 -->
+            <div class="collapse-toggle" @click="isCollapse = !isCollapse">
+                <el-icon>
+                    <template v-if="isCollapse">
+                        <SwitchButton />
+                    </template>
+                    <template v-else>
+                        <SwitchButton />
+                    </template>
+                </el-icon>
+            </div>
         </el-aside>
 
         <!-- 右侧主区域 -->
         <el-container>
             <!-- 头部区域 -->
             <el-header class="header">
-                <div>欢迎您，<strong>{{ userInfo.nickname }}</strong></div>
-                <el-dropdown placement="bottom-end" @command="handleCommand">
-                    <span class="el-dropdown__box">
-                        <el-avatar :src="userInfo.avatar" />
-                        <el-icon>
-                            <CaretBottom />
-                        </el-icon>
-                    </span>
-                    <template #dropdown>
-                        <el-dropdown-menu>
-                            <el-dropdown-item command="info" :icon="User">个人中心</el-dropdown-item>
-                            <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown>
+                <div class="header-left">
+                    欢迎您，<strong>{{ userInfo.nickname }}</strong>
+                </div>
+                <div class="header-right">
+                    <el-dropdown placement="bottom-end" @command="handleCommand">
+                        <span class="el-dropdown__box">
+                            <el-avatar :src="userInfo.avatar" />
+                            <el-icon>
+                                <CaretBottom />
+                            </el-icon>
+                        </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item command="info" :icon="User">个人中心</el-dropdown-item>
+                                <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </div>
             </el-header>
             <!-- 中间区域 -->
             <el-main>
@@ -109,36 +142,30 @@ const handleCommand = (command) => {
     </el-container>
 </template>
 <style scoped>
+/* 整体布局 */
 .layout-container {
     height: 100vh;
 }
-
-.menu-bar {
-    background-color: #2a3f54;
-    color: #fff;
-    width: 240px;
-    padding-top: 20px;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    height: 100vh;
-    overflow-y: auto;
-}
-
-.el-aside__logo {
-    height: 80px;
-    line-height: 80px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    color: #ffd04b;
-}
-
+/* el-header 样式 */
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* 左右对齐 */
     align-items: center;
     padding: 0 20px;
     background-color: #fff;
-    border-bottom: 1px solid #eaeaea;
+    height: 64px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-left {
+    font-size: 16px;
+    color: #333;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .el-dropdown__box {
@@ -148,14 +175,63 @@ const handleCommand = (command) => {
 }
 
 .el-avatar {
-    margin-right: 8px;
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
 }
 
-.el-menu-item {
-    background-color: #2a3f54;
-    /* 默认深蓝色背景 */
+.el-icon {
+    font-size: 16px;
+    color: #333;
+}
+
+/* el-aside 样式 */
+.menu-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #2a3f54; /* 统一背景颜色 */
+    height: 100vh; /* 高度撑满父容器 */
     color: #fff;
-    /* 默认文字颜色 */
+    overflow: hidden;
+    transition: width 0.3s ease; /* 平滑过渡 */
+}
+
+/* 顶部 logo 区域 */
+.el-aside__header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 64px;
+    background-color: #2a3f54; /* 保持与菜单栏一致 */
+    transition: all 0.3s ease;
+}
+
+.el-aside__logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffd04b;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.el-aside__logo.collapsed {
+    font-size: 24px;
+}
+
+/* 菜单内容 */
+.menu-content {
+    flex: 1; /* 菜单内容占满剩余空间 */
+    overflow-y: auto;
+    background-color: #2a3f54; /* 保持与顶部一致 */
+}
+
+/* 菜单项样式 */
+.el-menu-item {
+    background-color: transparent;
+    color: #fff;
     font-size: 16px;
     padding: 12px 20px;
     transition: background-color 0.3s, color 0.3s;
@@ -165,20 +241,32 @@ const handleCommand = (command) => {
 
 .el-menu-item:hover {
     background-color: #406182;
-    /* 比未选中颜色稍深，但比选中颜色浅 */
     color: #ffd04b;
-    /* 悬停时文字颜色为亮黄色 */
 }
 
 .el-menu-item.is-active {
     background-color: #406182;
-    /* 比未选中颜色稍深的蓝色 */
     color: #ffd04b;
-    /* 选中时文字颜色为亮黄色 */
 }
 
 .el-menu-item .el-icon {
     margin-right: 10px;
     font-size: 18px;
+}
+
+/* 收缩/展开按钮 */
+.collapse-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 64px;
+    cursor: pointer;
+    background-color: #2a3f54;
+    color: #ffd04b;
+    transition: all 0.3s ease;
+}
+
+.collapse-toggle:hover {
+    background-color: #406182;
 }
 </style>

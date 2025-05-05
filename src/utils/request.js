@@ -16,11 +16,9 @@ const service = axios.create(
 // 请求拦截
 service.interceptors.request.use(
     config => {
-        const userStore = useUserStore();
-        // console.log('请求拦截器', userStore.token);
         if(getToken()) {
             config.headers.Authorization = getToken();
-            console.log('请求头', getToken());
+            // console.log('请求头', getToken());
         }
         return config;
     }, error => {

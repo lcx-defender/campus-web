@@ -112,18 +112,13 @@ function filterChildren(childrenMap, parentPath = '') {
 
 export const loadView = (view) => {
   let res;
-  // console.log('全部模块', modules)
-  // console.log('当前模块', view)
   for (const path in modules) {
-    const dir = path.split('views/')[1].split('.vue')[0]
+    const dir = path.split('views/')[1].split('.vue')[0];
     if (dir === view) {
-      res = modules[path];
-      // console.log('当前模块路径', path);
-      // console.log('当前模块component:', res);
-      break;
+      res = () => modules[path]();
     }
   }
-  return res
+  return res;
 }
 
 

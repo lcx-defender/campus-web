@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user.js';
 import { updatePasswordService, userInfoService, updateUserInfoService } from '@/api/user.js';
 import {router} from '@/router/index.js';
-import pinia from '@/store';
+import cloneDeep from 'lodash/cloneDeep'; // 引入 lodash 的 cloneDeep 方法
 
 const userStore = useUserStore();
 
@@ -22,7 +22,7 @@ const getSelfInfo = async () => {
     const res = await userInfoService();
     console.log('前端接收的用户信息:', res);
     userInfo.value = res.data;
-    editForm.value = res.data;
+    editForm.value = cloneDeep(res.data);
     console.log("个人中心", userInfo.value);
 };
 getSelfInfo();
@@ -35,17 +35,15 @@ const saveInfo = async () => {
     const res = await updateUserInfoService(editForm.value);
     const response = await userInfoService();
     console.log('前端接收的用户信息:', response.data);
-    userStore.userInfo = response.data; // 更新 store 中的用户信息
+    userStore.userInfo = response.data;
     userInfo.value = response.data;
+    editForm.value = cloneDeep(response.data);
     ElMessage.success('基本资料已保存');
 };
 
 // 重置基本资料
 const resetInfo = () => {
-    editForm.value.nickname = userInfo.value.nickname;
-    editForm.value.phone = userInfo.value.phone;
-    editForm.value.email = userInfo.value.email;
-    editForm.value.sex = userInfo.value.sex;
+    editForm.value = cloneDeep(userInfo.value); // 使用深拷贝重置为 userInfo 的数据
     ElMessage.info('基本资料已重置');
 };
 
