@@ -34,15 +34,20 @@ service.interceptors.response.use(
             return result.data; // 保持原始响应结构
         }
         if(result.data.code===401) {
-            ElMessage.error('请先登录');
+            ElMessage.error(result.data.message?result.data.message:'请重新登录')
             router.push('/login');
-            return Promise.reject('请先登录');
+            return Promise.reject('请重新登录');
         }
         ElMessage.error(result.data.message?result.data.message:'服务异常')
         return Promise.reject(result.data);
     }, 
     err => {
-        console.log('错误信息', err);
+        if(err.code === 'ECONNABORTED') {
+            ElMessage.error('请求超时，请稍后再试')
+        } else {
+            ElMessage.error(err.message?err.message:'服务异常')
+        }
+        console.error('错误信息', err);
         return Promise.reject(err);
     }
 );

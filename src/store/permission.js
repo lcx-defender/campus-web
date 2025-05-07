@@ -1,4 +1,4 @@
-import { getRouters } from '@/api/menu.js'
+import { getRouters } from '@/api/system/menu.js'
 import { defineStore } from 'pinia'
 import { router, constantRoutes, dynamicRoutes } from '@/router/index.js'
 const Layout = () => import('@/components/layout/index.vue')

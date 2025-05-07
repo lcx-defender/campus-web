@@ -1,9 +1,17 @@
 // 导入request.js请求工具
 import request from '@/utils/request.js';
 
-// 获取用户详细信息
+// 获取自己详细信息
 export const userInfoService = () => {
     return request.get('/user/getSelfInfo');
+}
+// 获取用户详细信息
+export const getUser = (userId) => {
+    return request.get('/user/getUser' + '/' + userId);
+}
+// 获取用户列表
+export const listUser = (data) => {
+    return request.post('/user/pageList', data);
 }
 
 // 修改自己密码
@@ -22,7 +30,7 @@ export const updateUserInfoService = (data) => {
 }
 
 // 管理员修改其他用户信息
-export const updateUserInfoByAdminService = (data) => {
+export const updateUser = (data) => {
     return request.put('/user/updateUser', data);
 }
 
@@ -38,6 +46,21 @@ export const addStudentService = (data) => {
 }
 
 // 新增系统用户
-export const addUserService = (data) => {
+export const addUser = (data) => {
     return request.post('/user/addUser', data);
+}
+
+// 逻辑删除用户
+export const delUser = (userIds) => {
+    return request.delete('/user/deleteUsers'+'/'+userIds);
+}
+
+// 封禁用户
+export const banUser = (userIds) => {
+    return request.put('/user/banUser' + '/' + userIds);
+}
+
+// 恢复用户
+export const recoverUser = (userIds) => {
+    return request.put('/user/recoverUser' + '/' + userIds);
 }

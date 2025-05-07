@@ -1,6 +1,6 @@
 // user.js
 import { defineStore } from 'pinia';
-import { userInfoService } from '@/api/user.js';
+import { userInfoService } from '@/api/system/user.js';
 import { getToken } from '@/utils/token.js';
 
 export const useUserStore = defineStore('user', {

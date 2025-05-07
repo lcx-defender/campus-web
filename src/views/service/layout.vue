@@ -32,7 +32,6 @@ const menuItems = computed(() => {
     return serviceRoute?.children || [];
 });
 console.log('menuItems', menuItems.value)
-const activeMenu = computed(() => router.path)
 const isCollapse = ref(false)
 const handleOpen = function (key, keyPath) {
     console.log(key, keyPath);
@@ -42,8 +41,8 @@ const handleClose = function (key, keyPath) {
     console.log(key, keyPath);
 };
 
-import { logout } from '@/api/login.js';
-import { userInfoService } from '@/api/user.js';
+import { logout } from '@/api/system/login.js';
+import { userInfoService } from '@/api/system/user.js';
 const userInfo = ref({});
 const getUserInfo = async () => {
     const res = await userInfoService();
@@ -91,7 +90,7 @@ const handleCommand = (command) => {
                 </div>
             </div>
             <!-- 菜单 -->
-            <el-menu :default-active="activeMenu" :collapse="isCollapse" @open="handleOpen" @close="handleClose"
+            <el-menu :default-active="router.path" :collapse="isCollapse" @open="handleOpen" @close="handleClose"
                 active-text-color="#ffd04b" background-color="#2a3f54" text-color="#fff" router class="menu-content">
                 <MenuItem v-for="item in menuItems" :key="item.path" :item="item" />
             </el-menu>

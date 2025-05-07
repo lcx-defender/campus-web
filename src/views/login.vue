@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import {useRouter} from 'vue-router';
-import { loginByUsername, getCodeImg } from "@/api/login.js";
+import { loginByUsername, getCodeImg } from "@/api/system/login.js";
 import { useUserStore } from '@/store/user.js';
 import { setToken } from '@/utils/token.js';
 
@@ -153,13 +153,20 @@ const handleLogin = async () => {
   }
 }
 .login-code {
-  width: 33%;
+  width: 37%;
   height: 40px;
   float: right;
   img {
+    height: 40px;
+    width:auto;
     cursor: pointer;
     vertical-align: middle;
   }
+}
+.login-code-img {
+  height: 45px;
+  width:auto;
+  padding-left: 12px;
 }
 .el-login-footer {
   height: 40px;
@@ -173,8 +180,5 @@ const handleLogin = async () => {
   font-size: 12px;
   letter-spacing: 1px;
 }
-.login-code-img {
-  height: 40px;
-  padding-left: 12px;
-}
+
 </style>
