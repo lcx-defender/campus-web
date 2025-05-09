@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue';
-import { Plus, Edit, Lock, Close, Key, Search, Refresh, Unlock, Upload, Download } from '@element-plus/icons-vue';
+import { Plus, Edit, Lock, Close, Key, Search, Refresh, Unlock, Upload, Download, Setting } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { listUser, getUser, delUser, addUser, updateUser, banUser, recoverUser } from "@/api/system/user";
+import { getAllRoles } from "@/api/system/role";
+import { listUser, getUser, delUser, addUser, updateUser, banUser, recoverUser, getUserRoles, updateUserRoles } from "@/api/system/user";
 import { fa } from 'element-plus/es/locale';
 import { get } from 'lodash';
 import dayjs from "dayjs";
@@ -64,8 +65,15 @@ const rules = {
   email: [],
   phone: [],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-
 };
+const assignRoleDialogVisible = ref(false);
+const roleOptions = ref([]);
+const userRolesVo = ref(
+  {
+    userId: null,
+    roleIds: [],
+  }
+);
 
 const getList = async () => {
   loading.value = true;
@@ -101,41 +109,10 @@ const handleAdd = () => {
   reset();
   isEdit.value = false; // 新增模式
   rules.password = [{ required: true, message: '请输入密码', trigger: 'blur' }];
-  rules.userType = [{ required: true, message: '请选择用户类型', trigger: 'change' }];
   open.value = true;
   title.value = '新增用户';
 };
 
-const batchAddDialogVisible = ref(false);
-const handleBatchAdd = () => {
-  batchAddDialogVisible.value = true; // 打开批量添加对话框
-};
-
-const handleUploadSuccess = (response) => {
-  if (response.code === 200) {
-    ElMessage.success("批量添加成功");
-    getList(); // 刷新用户列表
-  } else {
-    ElMessage.error(response.message || "批量添加失败");
-  }
-};
-
-const handleUploadError = () => {
-  ElMessage.error("文件上传失败，请检查文件格式");
-};
-
-const beforeUpload = (file) => {
-  const isExcel = file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel";
-  if (!isExcel) {
-    ElMessage.error("只能上传 Excel 文件");
-  }
-  return isExcel;
-};
-
-const handleTemplateDownload = () => {
-  const templateUrl = "/api/downloadTemplate"; // 
-  window.open(templateUrl, "_blank");
-};
 const handleRowEdit = async (row: any) => {
   reset();
   isEdit.value = true;
@@ -283,6 +260,30 @@ const handleReset = () => {
   searchForm.value.pageNo = 1;
   getList();
 };
+
+const handleAssignRole = async (row: any) => { // 分配角色按钮点击事件
+  const userId = row.userId;
+  userRolesVo.value.userId = userId;
+  userRolesVo.value.roleIds = [];
+  const roleLsit = await getAllRoles();
+  roleOptions.value = roleLsit.data;
+  // 获取当前用户的角色
+  const userRoles = await getUserRoles(userId);
+  userRolesVo.value.roleIds = userRoles.data.map((role) => role.roleId);
+  assignRoleDialogVisible.value = true; // 打开对话框
+};
+
+const submitAssignRole = async () => {
+  try {
+    await updateUserRoles(userRolesVo.value);
+    ElMessage.success("角色分配成功");
+  } catch (error) {
+    ElMessage.error("角色分配失败");
+  } finally {
+    assignRoleDialogVisible.value = false;
+  }
+};
+
 getList();
 </script>
 
@@ -321,16 +322,6 @@ getList();
           <el-icon>
             <Plus />
           </el-icon>新增
-        </el-button>
-        <el-button type="primary" class="!rounded-button" @click="handleBatchAdd">
-          <el-icon>
-            <Upload />
-          </el-icon>批量添加
-        </el-button>
-        <el-button type="success" class="!rounded-button" @click="handleTemplateDownload">
-          <el-icon>
-            <Download />
-          </el-icon>模板下载
         </el-button>
         <el-button type="warning" class="!rounded-button" @click="handleBan">
           <el-icon>
@@ -375,7 +366,7 @@ getList();
             {{ formatDate(scope.row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column fixed="right" label="操作" width="200" align="center">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button type="primary" link :icon="Edit" @click="handleRowEdit(scope.row)">
@@ -397,6 +388,10 @@ getList();
               <el-button type="success" link :icon="Refresh" @click="handleRecover(scope.row)">
               </el-button>
             </el-tooltip>
+            <el-tooltip content="分配角色" placement="top">
+              <el-button type="primary" link :icon="Setting" @click="handleAssignRole(scope.row)">
+              </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -416,7 +411,7 @@ getList();
         <el-form-item label="用户昵称" prop="nickname">
           <el-input v-model="form.nickname" placeholder="请输入用户昵称" />
         </el-form-item>
-        <el-form-item label="用户类型" prop="userType">
+        <el-form-item label="用户类型" prop="userType" v-if="isEdit">
           <el-select v-model="form.userType" placeholder="请选择用户类型">
             <el-option v-for="(label, value) in userTypeMap" :key="value" :label="label" :value="value" />
           </el-select>
@@ -445,13 +440,18 @@ getList();
       </template>
     </el-dialog>
 
-    <el-dialog :title="'批量添加用户'" v-model="batchAddDialogVisible" width="500px">
-      <el-upload class="upload-demo" action="/api/uploadExcel" :on-success="handleUploadSuccess"
-        :on-error="handleUploadError" :before-upload="beforeUpload" :show-file-list="false">
-        <el-button type="primary">点击上传</el-button>
-      </el-upload>
+    <el-dialog :title="'分配角色'" v-model="assignRoleDialogVisible" width="500px">
+      <el-form>
+        <el-form-item label="角色列表">
+          <el-select v-model="userRolesVo.roleIds" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="4"
+            placeholder="请选择角色" style="width: 100%">
+            <el-option v-for="role in roleOptions" :key="role.roleId" :label="role.roleName" :value="role.roleId" />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <template #footer>
-        <el-button @click="batchAddDialogVisible = false">关闭</el-button>
+        <el-button @click="assignRoleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitAssignRole">确定</el-button>
       </template>
     </el-dialog>
   </div>

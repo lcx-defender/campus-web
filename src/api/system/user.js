@@ -7,11 +7,16 @@ export const userInfoService = () => {
 }
 // 获取用户详细信息
 export const getUser = (userId) => {
-    return request.get('/user/getUser' + '/' + userId);
+    return request.get('/user/getUser/' + userId);
 }
 // 获取用户列表
 export const listUser = (data) => {
     return request.post('/user/pageList', data);
+}
+
+// 获取用户的所有角色
+export const getUserRoles = (userId) => {
+    return request.get('/user/getUserRole/' + userId);
 }
 
 // 修改自己密码
@@ -32,6 +37,11 @@ export const updateUserInfoService = (data) => {
 // 管理员修改其他用户信息
 export const updateUser = (data) => {
     return request.put('/user/updateUser', data);
+}
+
+// 更新用户权限信息
+export const updateUserRoles = (data) => {
+    return request.put('/user/updateUserRoles', data);
 }
 
 
