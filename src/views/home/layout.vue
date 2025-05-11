@@ -56,7 +56,8 @@ const menuItems = computed(() => {
 
     <!-- 底部版权信息 -->
     <el-footer class="footer">
-      <p>© 2025 智慧迎新平台. 刘传星 版权所有.</p>
+      <p>© 2025 智慧迎新平台. 刘传星 版权所有. </p>
+      <p>如需合作，请将材料发送至 <a style="color: #409EFF" href="mailto:xxxxxxxxxxx@xx.com">100000000001@xx.com</a></p>
     </el-footer>
   </div>
 </template>

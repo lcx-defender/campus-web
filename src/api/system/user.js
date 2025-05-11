@@ -44,17 +44,6 @@ export const updateUserRoles = (data) => {
     return request.put('/user/updateUserRoles', data);
 }
 
-
-// 新增教师用户
-export const addTeacherService = (data) => {
-    return request.post('/user/addTeacher', data);
-}
-
-// 新增学生用户
-export const addStudentService = (data) => {
-    return request.post('/user/addStudent', data);
-}
-
 // 新增系统用户
 export const addUser = (data) => {
     return request.post('/user/addUser', data);

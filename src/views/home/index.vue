@@ -14,12 +14,9 @@ const navigateTo = (route) => {
     <p>
       智慧迎新平台致力于为学校和学生提供高效、便捷的迎新服务。通过我们的平台，您可以快速完成入学申请、查看学校信息以及获取最新的迎新动态。
     </p>
-    <el-button type="primary" @click="navigateTo('apply')">立即申请使用</el-button>
+    
   </div>
-
-  <!-- 嵌入关于我们部分 -->
   <AboutSection />
-
   <div class="features">
     <h2>我们的特色服务</h2>
     <div class="features-list">
@@ -40,7 +37,7 @@ const navigateTo = (route) => {
       </div>
     </div>
   </div>
-
+  
 </template>
 
 <style scoped>

@@ -74,7 +74,6 @@ const userRolesVo = ref(
     roleIds: [],
   }
 );
-
 const getList = async () => {
   loading.value = true;
   listUser(searchForm.value).then(response => {
@@ -86,7 +85,7 @@ const getList = async () => {
 const handleSelectionChange = (val: any[]) => {
   selectedRows.value = val;
   ids.value = val.map(item => item.userId);
-  single.value = val.length === 1;
+  single.value = val.length <= 1;
   multiple.value = !val.length;
 };
 const reset = () => {
@@ -147,13 +146,10 @@ const submitForm = async () => {
     }
   });
 }
-
-// 取消按钮
 const cancel = () => {
   open.value = false;
   reset();
 }
-
 const handleResetPassword = (row: any) => {
   ElMessage.success(`重置密码：${row.nickname}`);
 };

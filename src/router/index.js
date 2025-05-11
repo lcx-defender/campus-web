@@ -13,11 +13,6 @@ export const constantRoutes = [
             component: () => import('@/views/home/index.vue'), // 首页组件
         },
         {
-            path: '/apply',
-            meta: {title: '申请使用'},
-            component: () => import('@/views/home/apply.vue'), // 申请组件
-        },
-        {
             path: '/schools',
             meta: {title: '入驻学校'},
             component: () => import('@/views/home/schools.vue'), // 入驻学校组件
