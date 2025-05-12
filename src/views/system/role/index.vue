@@ -27,7 +27,7 @@ const roleForm = ref({
 });
 const roleMenusVo = ref({
   roleId: '',
-  menuIds: []
+  menuIds: null,
 });
 const authDialogVisible = ref(false); // 分配权限对话框
 const authTreeSelect = ref([]);
@@ -121,8 +121,9 @@ const handleAssignAuth = async (row: any) => {
 };
 // 提交权限
 const handleAuthSubmit = async () => {
-  await grantRoleMenus(roleMenusVo.value);
-  ElMessage.success('权限分配成功');
+  console.warn(roleMenusVo.value);
+  const res = await grantRoleMenus(roleMenusVo.value);
+  ElMessage.success((res as any).message || '权限分配成功');
   authDialogVisible.value = false;
 };
 // 解绑用户
@@ -130,8 +131,8 @@ const handleUnbindUser = (row: any) => {
   ElMessageBox.confirm('确认解绑该角色下的所有用户吗？', '提示', {
     type: 'warning'
   }).then(async () => {
-    unbindRoleUsers(row.roleId);
-    ElMessage.success('解绑成功');
+    const res = await unbindRoleUsers(row.roleId);
+    ElMessage.success((res as any).message || '解绑成功');
   });
 };
 const handleSizeChange = (val: number) => {
@@ -140,6 +141,7 @@ const handleSizeChange = (val: number) => {
 };
 const handleCurrentChange = (val: number) => {
   searchForm.value.pageNo = val;
+  getRolePage();
 };
 getRolePage();
 </script>
@@ -182,19 +184,19 @@ getRolePage();
         </el-button>
       </div>
       <!-- 表格区域 -->
-      <el-table :data="tableData" @selection-change="handleSelectionChange" border>
+      <el-table :data="tableData" @selection-change="handleSelectionChange" border style="width: 100%;">
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="roleName" label="角色名称" width="200" />
-        <el-table-column prop="roleKey" label="权限字符" width="200" />
-        <el-table-column prop="roleStatus" label="状态" width="100">
+        <el-table-column prop="roleName" label="角色名称" :show-overflow-tooltip="true" />
+        <el-table-column prop="roleKey" label="权限字符" :show-overflow-tooltip="true" />
+        <el-table-column prop="roleStatus" label="状态">
           <template #default="{ row }">
             <el-tag :type="row.roleStatus === '1' ? 'success' : 'danger'">
               {{ row.roleStatus === '1' ? '正常' : '停用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="180">
+        <el-table-column prop="createTime" label="创建时间" />
+        <el-table-column label="操作" fixed="right" >
           <template #default="{ row }">
             <div class="operation-cell">
               <el-tooltip content="修改" placement="top">
@@ -259,8 +261,15 @@ getRolePage();
     </el-dialog>
     <!-- 分配权限对话框 -->
     <el-dialog title="分配权限" v-model="authDialogVisible" width="400px">
-      <el-tree-select v-model="roleMenusVo.menuIds" :data="authTreeSelect" multiple show-checkbox node-key="id"
-        :props="{ label: 'label', children: 'children', value: 'value' }" placeholder="请选择权限" class="w-full" collapse-tags collapse-tags-tooltip  />
+      <el-tree-select 
+      v-model="roleMenusVo.menuIds" 
+      :data="authTreeSelect"
+      multiple 
+      :render-after-expand="false"
+      show-checkbox 
+      check-strictly
+      check-on-click-node
+      placeholder="请选择权限" />
       <template #footer>
         <el-button class="!rounded-button" @click="authDialogVisible = false">取消</el-button>
         <el-button type="primary" class="!rounded-button" @click="handleAuthSubmit">确定</el-button>
