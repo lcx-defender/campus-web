@@ -4,7 +4,9 @@ import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/store/user.js';
 import { updatePasswordService, userInfoService, updateUserInfoService } from '@/api/system/user.js';
 import { router } from '@/router/index.js';
-import cloneDeep from 'lodash/cloneDeep'; // 引入 lodash 的 cloneDeep 方法
+import cloneDeep from 'lodash/cloneDeep';
+import { Plus } from '@element-plus/icons-vue';
+import userAvatar from "@/views/user/userAvatar.vue";
 
 const userStore = useUserStore();
 
@@ -17,18 +19,24 @@ const passwordForm = ref({
     newPassword: '',
     confirmPassword: '',
 });
-
-const getSelfInfo = async () => {
-    const res = await userInfoService();
-    console.log('前端接收的用户信息:', res);
-    userInfo.value = res.data;
-    editForm.value = cloneDeep(res.data);
-    console.log("个人中心", userInfo.value);
-};
-getSelfInfo();
+const avatarDialogVisible = ref(false);
+const tempAvatar = ref('');
 
 // 当前激活的 Tab
 const activeTab = ref('info');
+
+const getSelfInfo = async () => {
+    // const res = await userInfoService();
+    // console.log('前端接收的用户信息:', res);
+    // userInfo.value = res.data;
+    // editForm.value = cloneDeep(res.data);
+    // console.log("个人中心", userInfo.value);
+
+    userInfo.value = userStore.userInfo;
+    editForm.value = cloneDeep(userStore.userInfo);
+    console.warn("个人中心", userInfo.value);
+};
+
 
 // 保存基本资料
 const saveInfo = async () => {
@@ -65,6 +73,8 @@ const resetPassword = () => {
     passwordForm.value.confirmPassword = '';
     ElMessage.info('密码表单已重置');
 };
+
+getSelfInfo();
 </script>
 <template>
     <div class="personal-center">
@@ -73,7 +83,7 @@ const resetPassword = () => {
             <el-col :span="8">
                 <el-card class="info-card">
                     <div class="info-header">
-                        <el-avatar :src="userInfo.avatar" size="large" />
+                        <userAvatar />
                         <h3>{{ userInfo.nickname }}</h3>
                     </div>
                     <ul class="info-list">
@@ -81,9 +91,9 @@ const resetPassword = () => {
                         <li><i class="el-icon-phone"></i> 手机号码：{{ userInfo.phone }}</li>
                         <li><i class="el-icon-message"></i> 用户邮箱：{{ userInfo.email }}</li>
                         <li><i class="el-icon-s-custom"></i> 用户类型：
-                            <template v-if="userInfo.userType === 0">系统管理员/程序员</template>
-                            <template v-else-if="userInfo.userType === 1">教师</template>
-                            <template v-else-if="userInfo.userType === 2">学生</template>
+                            <template v-if="userInfo.userType === '0'">系统管理员/程序员</template>
+                            <template v-else-if="userInfo.userType === '1'">教师</template>
+                            <template v-else-if="userInfo.userType === '2'">学生</template>
                             <template v-else>未知</template>
                         </li>
                         <li><i class="el-icon-identity"></i> 身份证号：{{ userInfo.identity }}</li>

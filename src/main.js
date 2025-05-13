@@ -12,9 +12,12 @@ import { router } from '@/router/index.js';
 import '@/router/permission.js';
 // import Cookies from 'js-cookie';
 import locale from 'element-plus/es/locale/lang/zh-cn';
+// 引入 SVG 图标
+import 'virtual:svg-icons-register'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 
 const app = createApp(App);
-
+app.component('svg-icon', SvgIcon);
 // 状态库，用来存放权限、用户个人信息
 app.use(pinia);
 // 路由

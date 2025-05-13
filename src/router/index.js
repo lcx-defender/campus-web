@@ -43,9 +43,9 @@ export const constantRoutes = [
         path: '/user/selfInfo',
         meta: {
           title: '个人中心',
-          icon: 'el-icon-user'
+          icon: 'user'
         },
-        component: () => import('@/views/service/personalCenter.vue'), // 用户信息组件
+        component: () => import('@/views/user/personalCenter.vue'), // 用户信息组件
       }
     ]
   }

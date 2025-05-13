@@ -7,6 +7,7 @@ import { logout } from '@/api/system/login.js';
 import { useUserStore } from '@/store/user.js'
 import { usePermissionStore } from '@/store/permission.js'
 import { getToken } from '@/utils/token.js'
+import { userInfoService } from '@/api/system/user.js'
 
 NProgress.configure({ showSpinner: false });
 const whiteList = ['/login', '/', '/index', '/apply', '/schools', '/about']; // no redirect whitelist
@@ -35,8 +36,11 @@ router.beforeEach(async (to, from, next) => {
         // 生成路由,用户信息交给layout组件处理
         try {
           const sidebarRouters = await permissionStore.generateRoutes();
-          console.log('路由守卫router',router.getRoutes())
-          console.log('路由守卫sidebarRouters', sidebarRouters)
+          const userInfo = await userInfoService();
+          const userStore = useUserStore();
+          userStore.setUserInfo(userInfo.data);
+          console.log('路由守卫router',router.getRoutes(), '用户信息', userInfo.data)
+          // console.log('路由守卫sidebarRouters', sidebarRouters)
           next({ ...to, replace: true }); // 重新导航到目标路径
         } catch (err) {
           console.error('路由加载失败:', err);

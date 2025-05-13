@@ -16,8 +16,9 @@ const service = axios.create(
 // 请求拦截
 service.interceptors.request.use(
     config => {
-        if(getToken()) {
-            config.headers.Authorization = getToken();
+        const token = getToken();
+        if(token) {
+            config.headers.Authorization = token;
             // console.log('请求头', getToken());
         }
         return config;
@@ -33,7 +34,7 @@ service.interceptors.response.use(
         if(result.data.code===200) {
             return result.data; // 保持原始响应结构
         }
-        if(result.data.code===401) {
+        else if(result.data.code===401) {
             ElMessage.error(result.data.message?result.data.message:'请重新登录')
             router.push('/login');
             return Promise.reject('请重新登录');

@@ -45,9 +45,10 @@ import { logout } from '@/api/system/login.js';
 import { userInfoService } from '@/api/system/user.js';
 const userInfo = ref({});
 const getUserInfo = async () => {
-    const res = await userInfoService();
-    useUserStore().setUserInfo(res.data); // 更新 store 中的用户信息
-    userInfo.value = res.data;
+    // const res = await userInfoService();
+    // useUserStore().setUserInfo(res.data); // 更新 store 中的用户信息
+    // userInfo.value = res.data;
+    userInfo.value = useUserStore().userInfo;
 };
 getUserInfo();
 
