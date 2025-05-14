@@ -3,7 +3,7 @@ import { router } from '@/router/index.js'
 import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import { logout } from '@/api/system/login.js';
+import { logout } from '@/api/login.js';
 import { useUserStore } from '@/store/user.js'
 import { usePermissionStore } from '@/store/permission.js'
 import { getToken } from '@/utils/token.js'

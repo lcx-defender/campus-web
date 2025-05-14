@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import {useRouter} from 'vue-router';
-import { loginByUsername, getCodeImg } from "@/api/system/login.js";
+import { loginByUsername, getCodeImg } from "@/api/login.js";
 import { useUserStore } from '@/store/user.js';
 import { setToken } from '@/utils/token.js';
 

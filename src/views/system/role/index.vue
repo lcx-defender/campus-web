@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, Plus, Delete, Refresh, Edit, Lock, User } from '@element-plus/icons-vue';
 import { getRolePageList, deleteRole, addRole, updateRole, getMenusByRoleId, grantRoleMenus, unbindRoleUsers } from '@/api/system/role.js';
 import {getMenuTreeSelect} from '@/api/system/menu.js';
+import { formatDate } from '@/utils/format.js';
 const loading = ref(false);
 const searchForm = ref({
   roleName: null,
@@ -184,7 +185,7 @@ getRolePage();
         </el-button>
       </div>
       <!-- 表格区域 -->
-      <el-table :data="tableData" @selection-change="handleSelectionChange" border style="width: 100%;">
+      <el-table :data="tableData" @selection-change="handleSelectionChange" style="width: 100%;">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="roleName" label="角色名称" :show-overflow-tooltip="true" />
         <el-table-column prop="roleKey" label="权限字符" :show-overflow-tooltip="true" />
@@ -195,7 +196,11 @@ getRolePage();
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" />
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <template #default="scope">
+          {{ formatDate(scope.row.createTime) }}
+        </template>
+      </el-table-column>
         <el-table-column label="操作" fixed="right" >
           <template #default="{ row }">
             <div class="operation-cell">

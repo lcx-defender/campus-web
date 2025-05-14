@@ -41,7 +41,7 @@ const handleClose = function (key, keyPath) {
     console.log(key, keyPath);
 };
 
-import { logout } from '@/api/system/login.js';
+import { logout } from '@/api/login.js';
 import { userInfoService } from '@/api/system/user.js';
 const userInfo = ref({});
 const getUserInfo = async () => {

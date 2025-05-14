@@ -15,6 +15,8 @@ import locale from 'element-plus/es/locale/lang/zh-cn';
 // 引入 SVG 图标
 import 'virtual:svg-icons-register'
 import SvgIcon from '@/components/SvgIcon/index.vue'
+// 引入日期格式化
+import { formatDate } from '@/utils/format'
 
 const app = createApp(App);
 app.component('svg-icon', SvgIcon);
@@ -22,6 +24,7 @@ app.component('svg-icon', SvgIcon);
 app.use(pinia);
 // 路由
 app.use(router);
+app.config.globalProperties.$formatDate = formatDate
 // 使用element-plus组件
 app.use(ElementPlus, {
     locale: locale,

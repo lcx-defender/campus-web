@@ -3,7 +3,7 @@ import { ref, reactive, nextTick } from 'vue';
 import { getMenuTree, addMenu, deleteMenu, updateMenu, queryMenu, getMenuTreeSelect } from '@/api/system/menu';
 import IconSelect from '@/components/IconSelect/index.vue';
 import { getCurrentInstance } from 'vue';
-const { proxy } = getCurrentInstance();
+import { formatDate } from '@/utils/format';
 // 查询表单
 const searchForm = ref({
    menuName: null,
@@ -68,7 +68,7 @@ const getMenusTree = async () => {
    }
 }
 
-const getMenuOption = async() => {
+const getMenuOption = async () => {
    menuOptions.value = [];
    const res = await getMenuTreeSelect();
    const mainMenu = { value: 0, label: "主目录", children: [] };
@@ -181,7 +181,11 @@ getMenusTree();
                </el-tag>
             </template>
          </el-table-column>
-         <el-table-column prop="createTime" label="创建时间" width="180" />
+         <el-table-column prop="createTime" label="创建时间" width="180">
+            <template #default="scope">
+               {{ formatDate(scope.row.createTime) }}
+            </template>
+         </el-table-column>
          <el-table-column label="操作" width="200" fixed="right">
             <template #default="{ row }">
                <el-button type="primary" link @click="handleEdit(row)">修改</el-button>

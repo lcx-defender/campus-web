@@ -6,10 +6,8 @@ import { getAllRoles } from "@/api/system/role";
 import { listUser, getUser, delUser, addUser, updateUser, banUser, recoverUser, getUserRoles, updateUserRoles } from "@/api/system/user";
 import { fa } from 'element-plus/es/locale';
 import { get } from 'lodash';
-import dayjs from "dayjs";
-const formatDate = (timestamp: number | string | Date) => {
-  return timestamp ? dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss') : '-';
-};
+import { formatDate } from '@/utils/format'
+
 const searchForm = ref({
   nickname: null,
   email: null,

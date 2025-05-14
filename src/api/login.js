@@ -1,4 +1,3 @@
-// 导入request.js请求工具
 import request from '@/utils/request.js';
 import { removeToken } from '@/utils/token.js';
 // 登录方法
