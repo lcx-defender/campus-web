@@ -31,6 +31,9 @@ service.interceptors.request.use(
 // 响应拦截
 service.interceptors.response.use(
     result => {
+        if (result.config.responseType === 'blob') {
+            return result;
+        }
         if(result.data.code===200) {
             return result.data; // 保持原始响应结构
         }

@@ -29,10 +29,8 @@ const dialogVisible = ref(false);
 const dialogTitle = ref('新增菜单');
 const menuOptions = ref([]);
 const formRef = ref();
-
-// 表单数据
-// 表单数据
 const formData = ref({
+   menuId :null,
    parentId: undefined,
    menuType: 'M',
    menuName: '',
@@ -87,21 +85,39 @@ const searchFormReset = () => {
    searchForm.value.menustatus = null;
    getMenusTree();
 }
+const resetForm = () => {
+   formData.value = {
+      menuId: null,
+      parentId: null,
+      menuType: 'M',
+      menuName: '',
+      icon: '',
+      orderNum: 0,
+      routerPath: '',
+      component: '',
+      queryParam: '',
+      isFrame: 1,
+      menuStatus: '0',
+      perms: ''
+   }
+}
 
 // 新增方法
 const handleAdd = async (row?: any) => {
    dialogTitle.value = '新增菜单';
+   resetForm();
    await getMenuOption();
    dialogVisible.value = true;
    // 如果是在某个菜单下新增,设置父级ID
    if (row) {
-      formData.value.parentId = row.id;
+      formData.value.parentId = row.menuId;
    }
 }
 
 // 修改方法
 const handleEdit = async (row: any) => {
    dialogTitle.value = '修改菜单';
+   resetForm();
    await getMenuOption();
    dialogVisible.value = true;
    Object.assign(formData.value, row);
@@ -198,7 +214,6 @@ getMenusTree();
    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="680px" append-to-body>
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
          <el-row>
-            <!-- 上级菜单 -->
             <el-col :span="24">
                <el-form-item label="上级菜单">
                   <el-tree-select v-model="formData.parentId" :data="menuOptions" :props="{
@@ -208,8 +223,6 @@ getMenusTree();
                   }" check-strictly placeholder="选择上级菜单" />
                </el-form-item>
             </el-col>
-
-            <!-- 菜单类型 -->
             <el-col :span="24">
                <el-form-item label="菜单类型" prop="menuType">
                   <el-radio-group v-model="formData.menuType">
@@ -219,7 +232,6 @@ getMenusTree();
                   </el-radio-group>
                </el-form-item>
             </el-col>
-
             <el-col :span="12" v-if="formData.menuType !== 'F'">
                <el-form-item label="菜单图标">
                   <el-popover placement="bottom-start" :width="540" trigger="click">
@@ -237,8 +249,6 @@ getMenusTree();
                   </el-popover>
                </el-form-item>
             </el-col>
-
-            <!-- 菜单名称 -->
             <el-col :span="12">
                <el-form-item label="菜单名称" prop="menuName">
                   <el-input v-model="formData.menuName" placeholder="请输入菜单名称" />

@@ -186,7 +186,7 @@ getList();
         </el-table-column>
         <el-table-column label="登录时间" align="center" prop="loginTime" width="180">
           <template #default="scope">
-            <span>{{ formatDate(scope.row.loginTime) }}</span>
+            <span>{{ formatDate(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="描述" align="center" prop="msg" :show-overflow-tooltip="true" />

@@ -5,9 +5,9 @@ export const getLogInfoPage = (data) => {
 }
 
 export const deleteLoginInfo = (infoIds) => {
-    return request.post('/login-info/delete/', infoIds);
+    return request.delete('/login-info/delete/', infoIds);
 }
 
 export const clearLoginInfo = () => {
-    return request.post('/login-info/clear');
+    return request.delete('/login-info/clear');
 }
