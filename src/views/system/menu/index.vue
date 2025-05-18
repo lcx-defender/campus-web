@@ -287,8 +287,8 @@ getMenusTree();
             <el-col :span="12" v-if="formData.menuType !== 'F'">
                <el-form-item label="是否外链">
                   <el-radio-group v-model="formData.isFrame">
-                     <el-radio :label="1">是</el-radio>
-                     <el-radio :label="0">否</el-radio>
+                     <el-radio :label="0">是</el-radio>
+                     <el-radio :label="1">否</el-radio>
                   </el-radio-group>
                </el-form-item>
             </el-col>
