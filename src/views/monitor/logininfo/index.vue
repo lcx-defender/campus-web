@@ -177,10 +177,10 @@ getList();
         <el-table-column label="登录地址" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
         <el-table-column label="操作系统" align="center" prop="os" :show-overflow-tooltip="true" />
         <el-table-column label="浏览器" align="center" prop="browser" :show-overflow-tooltip="true" />
-        <el-table-column label="登录状态" align="center" prop="status" width="100">
+        <el-table-column label="登录状态" align="center" prop="loginStatus" width="100">
           <template #default="scope">
-            <el-tag :type="loginStatusTagMap[scope.row.status]?.type">
-              {{ loginStatusTagMap[scope.row.status]?.label }}
+            <el-tag :type="loginStatusTagMap[scope.row.loginStatus]?.type">
+              {{ loginStatusTagMap[scope.row.loginStatus]?.label }}
             </el-tag>
           </template>
         </el-table-column>

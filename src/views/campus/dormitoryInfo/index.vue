@@ -206,7 +206,6 @@ getList();
                 <el-input v-model="searchForm.dormitoryId" placeholder="请输入宿舍楼号" clearable />
                 <el-input v-model="searchForm.roomId" placeholder="请输入房间号" clearable />
                 <el-input v-model="searchForm.bedId" placeholder="请输入床位号" clearable />
-                <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable />
             </div>
             <div class="button-group">
                 <el-button type="primary" class="!rounded-button" @click="handleSearch">
@@ -239,7 +238,6 @@ getList();
                 <el-table-column prop="dormitoryId" label="宿舍楼号" align="center" />
                 <el-table-column prop="roomId" label="房间号" align="center" />
                 <el-table-column prop="bedId" label="床位号" align="center" />
-                <el-table-column prop="studentName" label="学生姓名" align="center" />
                 <el-table-column fixed="right" label="操作" width="180" align="center">
                     <template #default="scope">
                         <el-button type="primary" link :icon="Edit" @click="handleEdit(scope.row)">

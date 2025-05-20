@@ -3,7 +3,7 @@ import { ref, reactive } from 'vue';
 import { Plus, Edit, Search, Refresh, Upload, Download } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getStudentPage, addStudentService, editStudentService, batchAddStudent, batchExportStudent } from "@/api/campus/student";
-import { formatDate } from '@/utils/format'
+import { formatDate } from '@/utils/format';
 
 const searchForm = ref({
     studentName: null,
