@@ -7,16 +7,16 @@ export const constantRoutes = [
     component: () => import('@/views/home/layout.vue'), // 首页组件
     redirect: '/index', // 重定向到/home
     children: [
-        {
-            path: '/index',
-            meta: {title: '首页'},
-            component: () => import('@/views/home/index.vue'), // 首页组件
-        },
-        {
-            path: '/schools',
-            meta: {title: '入驻学校'},
-            component: () => import('@/views/home/schools.vue'), // 入驻学校组件
-        }
+      {
+        path: '/index',
+        meta: { title: '首页' },
+        component: () => import('@/views/home/index.vue'), // 首页组件
+      },
+      {
+        path: '/schools',
+        meta: { title: '入驻学校' },
+        component: () => import('@/views/home/schools.vue'), // 入驻学校组件
+      }
     ]
   },
   {
@@ -46,6 +46,14 @@ export const constantRoutes = [
           icon: 'user'
         },
         component: () => import('@/views/user/personalCenter.vue'), // 用户信息组件
+      },
+      {
+        path: '/chat',
+        meta: {
+          title: 'AI聊天助手',
+          icon: 'chat-ai'
+        },
+        component: () => import('@/views/chat/ChatAI.vue')
       }
     ]
   }
