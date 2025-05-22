@@ -3,7 +3,7 @@ import { ref, reactive } from 'vue';
 import { Plus, Edit, Lock, Close, Key, Search, Refresh, Unlock, Upload, Download, Setting } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getAllRoles } from "@/api/system/role";
-import { listUser, getUser, delUser, addUser, updateUser, banUser, recoverUser, getUserRoles, updateUserRoles } from "@/api/system/user";
+import { listUser, getUser, delUser, addUser, updateUser, banUser, recoverUser, getUserRoles, updateUserRoles,resetUserPasswordService } from "@/api/system/user";
 import { fa } from 'element-plus/es/locale';
 import { get } from 'lodash';
 import { formatDate } from '@/utils/format'
@@ -148,9 +148,42 @@ const cancel = () => {
   open.value = false;
   reset();
 }
-const handleResetPassword = (row: any) => {
-  ElMessage.success(`重置密码：${row.nickname}`);
+const resetPasswordDialogVisible = ref(false);
+const resetPasswordForm = ref({
+  userId: null,
+  newPassword: ''
+});
+const resetPasswordRules = {
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
+  ]
 };
+const resetPasswordRef = ref(null);
+const handleResetPassword = (row: any) => {
+  resetPasswordForm.value = {
+    userId: row.userId,
+    newPassword: ''
+  };
+  resetPasswordDialogVisible.value = true;
+};
+const submitResetPassword = () => {
+  resetPasswordRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        await resetUserPasswordService(resetPasswordForm.value);
+        ElMessage.success('密码重置成功');
+        resetPasswordDialogVisible.value = false;
+      } catch (error) {
+        console.error('重置密码失败:', error);
+        ElMessage.error('密码重置失败，请稍后重试');
+      }
+    } else {
+      ElMessage.error('请正确填写表单信息');
+    }
+  });
+};
+
 const handleBan = (row: any) => {
   const _userIds = row.userId || ids.value;
   const _nicknames = row.nickname || selectedRows.value.map((row) => row.nickname).join(",");
@@ -433,7 +466,29 @@ getList();
         </div>
       </template>
     </el-dialog>
-
+    <el-dialog title="重置用户密码" v-model="resetPasswordDialogVisible" width="400px">
+    <el-form 
+      ref="resetPasswordRef" 
+      :model="resetPasswordForm" 
+      :rules="resetPasswordRules" 
+      label-width="80px"
+    >
+      <el-form-item label="新密码" prop="newPassword">
+        <el-input 
+          v-model="resetPasswordForm.newPassword" 
+          placeholder="请输入新密码"
+          type="password"
+          show-password
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="resetPasswordDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitResetPassword">确 定</el-button>
+      </div>
+    </template>
+  </el-dialog>
     <el-dialog :title="'分配角色'" v-model="assignRoleDialogVisible" width="500px">
       <el-form>
         <el-form-item label="角色列表">

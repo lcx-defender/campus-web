@@ -5,28 +5,19 @@ import { router } from '@/router/index.js';
 // 确保 BASE_URL 有一个默认值
 const BASE_URL = import.meta.env.VITE_APP_BASE_API || '/dev-api';
 
-// 封装 fetch 请求，添加拦截器功能
 const fetchWithInterceptors = async (url, options = {}) => {
   try {
-    // 请求拦截 - 添加 token
     const token = getToken();
     if (token) {
-      // 先设置 Authorization 头
       options.headers = {
         ...options.headers,
         'Authorization': token
       };
-
-      // 如果用户没有指定 Content-Type，且不是 FormData，则设置默认值
       if (!options.headers['Content-Type'] && !(options.body instanceof FormData)) {
         options.headers['Content-Type'] = 'application/json;charset=utf-8';
       }
     }
-
-    // 发送请求
     const response = await fetch(url, options);
-
-    // 如果是流式响应，直接返回
     if (options.responseType === 'stream') {
       if (!response.ok) {
         if (response.status === 401) {
@@ -51,8 +42,6 @@ const fetchWithInterceptors = async (url, options = {}) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     }
-
-    // 非流式响应处理 - 直接返回数据
     const data = await response.json();
     return data;
   } catch (error) {
@@ -62,16 +51,10 @@ const fetchWithInterceptors = async (url, options = {}) => {
 };
 
 export const chatAPI = {
-  // 发送聊天消息
   async sendMessage(data, chatId) {
     try {
-      // 确保 chatId 存在，如果不存在则生成一个
       const actualChatId = chatId || `chat-${Date.now()}`;
-
-      // 构建完整的 URL 字符串
       const urlString = `${BASE_URL}/ai-chat/chat`;
-
-      // 准备请求体和头信息
       let body;
       let headers = {};
 
@@ -165,10 +148,7 @@ export const chatAPI = {
   // 发送 PDF 问答消息
   async sendPdfMessage(prompt, chatId) {
     try {
-      // 确保 chatId 存在
       const actualChatId = chatId || `pdf-${Date.now()}`;
-
-      // 使用查询参数构建 URL
       const params = new URLSearchParams({
         prompt: prompt,
         chatId: actualChatId
