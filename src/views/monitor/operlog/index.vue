@@ -9,7 +9,7 @@ import { formatDate } from '@/utils/format';
 const searchForm = ref({
   operateIp: null,
   title: null, 
-  operName: null,
+  userId: null,
   operateStatus: null,
   pageNo: 1,
   pageSize: 10
@@ -146,9 +146,9 @@ getList();
             @keyup.enter="handleSearch" 
           />
         </el-form-item>
-        <el-form-item label="操作人员" prop="operName">
+        <el-form-item label="操作人员" prop="userId">
           <el-input 
-            v-model="searchForm.operName" 
+            v-model="searchForm.userId" 
             placeholder="请输入操作人员" 
             clearable 
             style="width: 240px"
@@ -195,7 +195,7 @@ getList();
         <el-table-column label="日志编号" align="center" prop="operateId" />
         <el-table-column label="系统模块" align="center" prop="title" :show-overflow-tooltip="true" />
         <el-table-column label="请求方式" align="center" prop="requestMethod" />
-        <el-table-column label="操作人员" align="center" prop="operName" width="120" :show-overflow-tooltip="true" />
+        <el-table-column label="操作人员" align="center" prop="userId" width="120" :show-overflow-tooltip="true" />
         <el-table-column label="操作地址" align="center" prop="operateIp" width="130" :show-overflow-tooltip="true" />
         <el-table-column label="操作状态" align="center" prop="operateStatus" width="100">
           <template #default="scope">

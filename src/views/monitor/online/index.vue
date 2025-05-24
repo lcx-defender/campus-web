@@ -113,7 +113,7 @@ getList();
         :data="tableData"
       >
         <el-table-column label="会话编号" align="center" prop="tokenId" :show-overflow-tooltip="true" />
-        <el-table-column label="登录地址" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
+        <el-table-column label="登录IP" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
         <el-table-column label="登录地点" align="center" prop="loginLocation" :show-overflow-tooltip="true" />
         <el-table-column label="操作系统" align="center" prop="os" :show-overflow-tooltip="true" />
         <el-table-column label="浏览器" align="center" prop="browser" :show-overflow-tooltip="true" />
