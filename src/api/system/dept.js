@@ -5,7 +5,10 @@ export const getDeptTreeSelect = () => {
   return request.get('/dept/treeSelect')
 }
 export const getDeptTree = (data) => {
-  return request.post('/dept/selectDeptTreeList', data)
+  return request.post('/dept/selectDeptTree', data)
+}
+export const getDeptList = (data) => {
+  return request.post('/dept/getDeptList', data)
 }
 export const addDept = (data) => {
   return request.post('/dept/addDept', data)

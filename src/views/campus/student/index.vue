@@ -3,12 +3,13 @@ import { ref, reactive } from 'vue';
 import { Plus, Edit, Search, Refresh, Upload, Download } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getStudentPage, addStudentService, editStudentService, batchAddStudent, batchExportStudent } from "@/api/campus/student";
+import { getDeptTreeSelect, getDeptList } from "@/api/system/dept";
 import { formatDate } from '@/utils/format';
 
 const searchForm = ref({
     studentName: null,
     studentNo: null,
-    className: null,
+    deptId: null,
     grade: null,
     pageNo: 1,
     pageSize: 10
@@ -27,7 +28,6 @@ const sexMap = {
     "1": '女',
     "2": '保密',
 };
-
 const academicStatusMap = {
     "0": "未注册",
     "1": "在籍",
@@ -38,6 +38,18 @@ const academicStatusMap = {
     "6": "结业",
     "7": "肄业"
 };
+const deptOptions = ref([]);
+const deptMap = ref({});
+
+const schoolOptions = ref([]); // 学校选项
+const collegeOptions = ref([]); // 学院选项
+const majorOptions = ref([]); // 专业选项
+const classOptions = ref([]); // 班级选项
+// 联动选择的值
+const selectedSchool = ref(null);
+const selectedCollege = ref(null);
+const selectedMajor = ref(null);
+const selectedClass = ref(null);
 
 const addDialogVisible = ref(false);
 const addFormRef = ref(null);
@@ -139,6 +151,14 @@ const resetAddForm = () => {
         homeAddress: null
     };
     addFormRef.value?.resetFields();
+
+    selectedSchool.value = null;
+    selectedCollege.value = null;
+    selectedMajor.value = null;
+    selectedClass.value = null;
+    collegeOptions.value = [];
+    majorOptions.value = [];
+    classOptions.value = [];
 };
 
 const resetEditForm = () => {
@@ -169,8 +189,40 @@ const resetEditForm = () => {
         homeAddress: null        // 家庭住址
     };
     editFormRef.value?.resetFields();
+    selectedSchool.value = null;
+    selectedCollege.value = null;
+    selectedMajor.value = null;
+    selectedClass.value = null;
+    collegeOptions.value = [];
+    majorOptions.value = [];
+    classOptions.value = [];
+};
+const getDeptTreeData = async () => {
+    try {
+        const response = await getDeptTreeSelect();
+        deptOptions.value = response.data || [];
+    } catch (error) {
+        console.error('获取部门树形数据失败', error);
+    }
 };
 
+// 获取部门列表并构建映射表
+const getDeptListData = async () => {
+    try {
+        const response = await getDeptList({});
+        const list = response.data || [];
+        deptMap.value = list.reduce((acc, item) => {
+            acc[item.deptId] = item.deptName;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error('获取部门列表失败', error);
+    }
+};
+// 在表格中显示部门名称
+const getDeptName = (deptId) => {
+    return deptMap.value[deptId] || deptId;
+};
 // 获取学生列表
 const getList = async () => {
     loading.value = true;
@@ -191,9 +243,112 @@ const handleSelectionChange = (val) => {
     multiple.value = !val.length;
 };
 
+const getSchoolOptions = async () => {
+    try {
+        const response = await getDeptList({ parentId: 0 }); // 假设 parentId = 0 代表根部门
+        schoolOptions.value = response.data || [];
+    } catch (error) {
+        console.error('获取学校列表失败', error);
+    }
+};
+
+const getDeptByParent = async (parentId, targetRef) => {
+    if (!parentId) {
+        targetRef.value = [];
+        return;
+    }
+    try {
+        const response = await getDeptList({ parentId });
+        targetRef.value = response.data || [];
+    } catch (error) {
+        console.error('获取部门列表失败', error);
+        targetRef.value = [];
+    }
+};
+
+// 学校选择变更事件
+const handleSchoolChange = (val) => {
+    selectedCollege.value = null;
+    selectedMajor.value = null;
+    selectedClass.value = null;
+    collegeOptions.value = [];
+    majorOptions.value = [];
+    classOptions.value = [];
+
+    if (val) {
+        getDeptByParent(val, collegeOptions);
+    }
+
+    // 更新表单值
+    if (addDialogVisible.value) {
+        addForm.value.universityId = val;
+        addForm.value.instituteId = null;
+        addForm.value.majorId = null;
+        addForm.value.classId = null;
+    } else if (editDialogVisible.value) {
+        editForm.value.universityId = val;
+        editForm.value.instituteId = null;
+        editForm.value.majorId = null;
+        editForm.value.classId = null;
+    }
+};
+
+// 学院选择变更事件
+const handleCollegeChange = (val) => {
+    selectedMajor.value = null;
+    selectedClass.value = null;
+    majorOptions.value = [];
+    classOptions.value = [];
+
+    if (val) {
+        getDeptByParent(val, majorOptions);
+    }
+
+    // 更新表单值
+    if (addDialogVisible.value) {
+        addForm.value.instituteId = val;
+        addForm.value.majorId = null;
+        addForm.value.classId = null;
+    } else if (editDialogVisible.value) {
+        editForm.value.instituteId = val;
+        editForm.value.majorId = null;
+        editForm.value.classId = null;
+    }
+};
+
+// 专业选择变更事件
+const handleMajorChange = (val) => {
+    selectedClass.value = null;
+    classOptions.value = [];
+
+    if (val) {
+        getDeptByParent(val, classOptions);
+    }
+
+    // 更新表单值
+    if (addDialogVisible.value) {
+        addForm.value.majorId = val;
+        addForm.value.classId = null;
+    } else if (editDialogVisible.value) {
+        editForm.value.majorId = val;
+        editForm.value.classId = null;
+    }
+};
+
+// 班级选择变更事件
+const handleClassChange = (val) => {
+    // 更新表单值
+    if (addDialogVisible.value) {
+        addForm.value.classId = val;
+    } else if (editDialogVisible.value) {
+        editForm.value.classId = val;
+    }
+};
+
 // 添加学生
 const handleAdd = () => {
     resetAddForm();
+    getSchoolOptions(); // 加载学校选项
     addDialogVisible.value = true;
 };
 
@@ -201,6 +356,31 @@ const handleAdd = () => {
 const handleEdit = (row) => {
     resetEditForm();
     editForm.value = { ...row };
+    // 加载学校选项
+    getSchoolOptions();
+
+    // 如果有学校ID，则加载学院选项
+    if (row.universityId) {
+        selectedSchool.value = row.universityId;
+        getDeptByParent(row.universityId, collegeOptions);
+
+        // 如果有学院ID，则加载专业选项
+        if (row.instituteId) {
+            selectedCollege.value = row.instituteId;
+            getDeptByParent(row.instituteId, majorOptions);
+
+            // 如果有专业ID，则加载班级选项
+            if (row.majorId) {
+                selectedMajor.value = row.majorId;
+                getDeptByParent(row.majorId, classOptions);
+
+                // 如果有班级ID，则设置选中
+                if (row.classId) {
+                    selectedClass.value = row.classId;
+                }
+            }
+        }
+    }
     editDialogVisible.value = true;
 };
 
@@ -315,7 +495,7 @@ const handleReset = () => {
     searchForm.value = {
         studentName: null,
         studentNo: null,
-        className: null,
+        deptId: null,
         grade: null,
         pageNo: 1,
         pageSize: 10
@@ -324,6 +504,9 @@ const handleReset = () => {
 };
 
 getList();
+getDeptTreeData();
+getDeptListData();
+getSchoolOptions();
 </script>
 
 <template>
@@ -332,7 +515,8 @@ getList();
             <div class="search-form">
                 <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable />
                 <el-input v-model="searchForm.studentNo" placeholder="请输入学号" clearable />
-                <el-input v-model="searchForm.className" placeholder="请输入班级" clearable />
+                <el-tree-select v-model="searchForm.deptId" :data="deptOptions" check-strictly placeholder="请选择所属部门"
+                    clearable node-key="value" :props="{ label: 'label', children: 'children' }" />
                 <el-input v-model="searchForm.grade" placeholder="请输入年级" clearable />
             </div>
             <div class="button-group">
@@ -463,26 +647,42 @@ getList();
                 </el-row>
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="学校代码" prop="universityId">
-                            <el-input v-model="addForm.universityId" placeholder="请输入学校代码" />
+                        <el-form-item label="学校" prop="universityId">
+                            <el-select v-model="selectedSchool" placeholder="请选择学校" @change="handleSchoolChange"
+                                clearable>
+                                <el-option v-for="item in schoolOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="学院代码" prop="instituteId">
-                            <el-input v-model="addForm.instituteId" placeholder="请输入学院代码" />
+                        <el-form-item label="学院" prop="instituteId">
+                            <el-select v-model="selectedCollege" placeholder="请选择学院" @change="handleCollegeChange"
+                                clearable :disabled="!selectedSchool">
+                                <el-option v-for="item in collegeOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="专业代码" prop="majorId">
-                            <el-input v-model="addForm.majorId" placeholder="请输入专业代码" />
+                        <el-form-item label="专业" prop="majorId">
+                            <el-select v-model="selectedMajor" placeholder="请选择专业" @change="handleMajorChange" clearable
+                                :disabled="!selectedCollege">
+                                <el-option v-for="item in majorOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="班级代码" prop="classId">
-                            <el-input v-model="addForm.classId" placeholder="请输入班级代码" />
+                        <el-form-item label="班级" prop="classId">
+                            <el-select v-model="selectedClass" placeholder="请选择班级" @change="handleClassChange" clearable
+                                :disabled="!selectedMajor">
+                                <el-option v-for="item in classOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -615,26 +815,42 @@ getList();
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="学校代码" prop="universityId">
-                            <el-input v-model="editForm.universityId" placeholder="请输入学校代码" />
+                        <el-form-item label="学校" prop="universityId">
+                            <el-select v-model="selectedSchool" placeholder="请选择学校" @change="handleSchoolChange"
+                                clearable>
+                                <el-option v-for="item in schoolOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="学院代码" prop="instituteId">
-                            <el-input v-model="editForm.instituteId" placeholder="请输入学院代码" />
+                        <el-form-item label="学院" prop="instituteId">
+                            <el-select v-model="selectedCollege" placeholder="请选择学院" @change="handleCollegeChange"
+                                clearable :disabled="!selectedSchool">
+                                <el-option v-for="item in collegeOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="专业代码" prop="majorId">
-                            <el-input v-model="editForm.majorId" placeholder="请输入专业代码" />
+                        <el-form-item label="专业" prop="majorId">
+                            <el-select v-model="selectedMajor" placeholder="请选择专业" @change="handleMajorChange" clearable
+                                :disabled="!selectedCollege">
+                                <el-option v-for="item in majorOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="班级代码" prop="classId">
-                            <el-input v-model="editForm.classId" placeholder="请输入班级代码" />
+                        <el-form-item label="班级" prop="classId">
+                            <el-select v-model="selectedClass" placeholder="请选择班级" @change="handleClassChange" clearable
+                                :disabled="!selectedMajor">
+                                <el-option v-for="item in classOptions" :key="item.deptId" :label="item.deptName"
+                                    :value="item.deptId" />
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>

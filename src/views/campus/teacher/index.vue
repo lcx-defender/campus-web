@@ -3,7 +3,8 @@ import { ref, reactive } from 'vue';
 import { Plus, Edit, Search, Refresh } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getTeacherPage, addTeacherService, editTeacherService, getTeacherUserPage } from "@/api/campus/teacher";
-import { formatDate } from '@/utils/format'
+import { getDeptTreeSelect, getDeptList } from "@/api/system/dept";
+import { formatDate } from '@/utils/format';
 
 // 查询表单
 const searchForm = ref({
@@ -31,6 +32,8 @@ const positionStatusMap = {
     "1": "停职",
     "2": "离职"
 };
+const deptOptions = ref([]);
+const deptMap = ref({});
 
 // 新增表单
 const addDialogVisible = ref(false);
@@ -140,6 +143,28 @@ const resetEditForm = () => {
     };
     editFormRef.value?.resetFields();
 };
+const getDeptTreeData = async () => {
+    try {
+        const response = await getDeptTreeSelect();
+        deptOptions.value = response.data || [];
+    } catch (error) {
+        console.error('获取部门树形数据失败', error);
+    }
+};
+
+// 获取部门列表并构建映射表
+const getDeptListData = async () => {
+    try {
+        const response = await getDeptList({});
+        const list = response.data || [];
+        deptMap.value = list.reduce((acc, item) => {
+            acc[item.deptId] = item.deptName;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error('获取部门列表失败', error);
+    }
+};
 
 // 添加教师
 const handleAdd = () => {
@@ -216,19 +241,19 @@ const handleReset = () => {
 };
 
 getList();
+getDeptTreeData();
+getDeptListData();
 </script>
 
 <template>
     <div class="page-container">
         <div class="content-wrapper">
-            <!-- 搜索表单 -->
             <div class="search-form">
                 <el-input v-model="searchForm.teacherName" placeholder="请输入教师姓名" clearable />
                 <el-input v-model="searchForm.teacherId" placeholder="请输入工号" clearable />
-                <el-input v-model="searchForm.deptId" placeholder="请输入部门代码" clearable />
+                <el-tree-select v-model="searchForm.deptId" :data="deptOptions" check-strictly placeholder="请选择部门" clearable
+                    node-key="value" :props="{ label: 'label', children: 'children' }" />
             </div>
-
-            <!-- 按钮组 -->
             <div class="button-group">
                 <el-button type="primary" class="!rounded-button" @click="handleSearch">
                     <el-icon>
@@ -258,7 +283,11 @@ getList();
                         {{ sexMap[scope.row.sex] }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="deptId" label="部门代码" align="center" />
+                <el-table-column prop="deptId" label="部门" :show-overflow-tooltip="true" align="center">
+                    <template #default="scope">
+                        {{ deptMap[scope.row.deptId] || scope.row.deptId }}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="title" label="职称" align="center" />
                 <el-table-column prop="office" label="办公室" align="center" />
                 <el-table-column prop="positionStatus" label="职位状态" align="center">
@@ -347,8 +376,9 @@ getList();
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="部门代码" prop="deptId">
-                            <el-input v-model="addForm.deptId" placeholder="请输入部门代码" />
+                        <el-form-item label="部门" prop="deptId">
+                            <el-tree-select v-model="addForm.deptId" :data="deptOptions" check-strictly placeholder="请选择部门"
+                                node-key="value" :props="{ label: 'label', children: 'children' }" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -386,7 +416,6 @@ getList();
             </template>
         </el-dialog>
 
-        <!-- 编辑对话框 -->
         <el-dialog title="编辑教师" v-model="editDialogVisible" width="700px" append-to-body>
             <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
                 <!-- 用户信息 -->
@@ -445,8 +474,9 @@ getList();
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="部门代码" prop="deptId">
-                            <el-input v-model="editForm.deptId" placeholder="请输入部门代码" />
+                        <el-form-item label="部门" prop="deptId">
+                            <el-tree-select v-model="editForm.deptId" :data="deptOptions" check-strictly placeholder="请选择部门"
+                                node-key="value" :props="{ label: 'label', children: 'children' }" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
