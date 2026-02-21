@@ -390,8 +390,8 @@ const submitAddForm = async () => {
         if (valid) {
             try {
                 loading.value = true;
-                await addStudentService(addForm.value);
-                ElMessage.success('添加成功');
+                const res = await addStudentService(addForm.value);
+                ElMessage.success(res.message || '添加成功');
                 addDialogVisible.value = false;
                 getList();
             } finally {
@@ -406,8 +406,8 @@ const submitEditForm = async () => {
         if (valid) {
             try {
                 loading.value = true;
-                await editStudentService(editForm.value);
-                ElMessage.success('修改成功');
+                const res = await editStudentService(editForm.value);
+                ElMessage.success(res.message || '修改成功');
                 editDialogVisible.value = false;
                 getList();
             } finally {

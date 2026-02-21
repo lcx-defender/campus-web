@@ -131,11 +131,11 @@ const submitForm = async () => {
     if (valid) {
       loading.value = true;
       if (form.value.userId) {
-        await updateUser(form.value);
-        ElMessage.success('修改成功');
+        const res = await updateUser(form.value);
+        ElMessage.success(res.message || '修改成功');
       } else {
-        await addUser(form.value);
-        ElMessage.success('添加成功');
+        const res = await addUser(form.value);
+        ElMessage.success(res.message || '添加成功');
       }
       open.value = false;
       getList();
@@ -368,6 +368,7 @@ getList();
       </div>
       <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
+        <el-table-column prop="identity" label="身份证号" align="center" :show-overflow-tooltip="true" />
         <el-table-column prop="nickname" label="用户昵称" align="center" :show-overflow-tooltip="true" />
         <el-table-column prop="email" label="邮箱" align="center" :show-overflow-tooltip="true" />
         <el-table-column prop="phone" label="手机号" align="center" />

@@ -136,36 +136,36 @@ getList();
                 </el-button>
             </div>
             <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                <el-table-column prop="leaveType" label="请假类型" align="center">
+                <el-table-column prop="leaveType" label="请假类型" align="center" :show-overflow-tooltip="true">
                     <template #default="scope">
                         {{ leaveTypeMap[scope.row.leaveType] }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="startTime" label="开始时间" align="center">
+                <el-table-column prop="startTime" label="开始时间" align="center" :show-overflow-tooltip="true">
                     <template #default="scope">
                         {{ formatDate(scope.row.startTime) }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="endTime" label="结束时间" align="center">
+                <el-table-column prop="endTime" label="结束时间" align="center" :show-overflow-tooltip="true">
                     <template #default="scope">
                         {{ formatDate(scope.row.endTime) }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="isOffCampus" label="是否校外" align="center">
+                <el-table-column prop="isOffCampus" label="是否校外" align="center" :show-overflow-tooltip="true">
                     <template #default="scope">
                         {{ isOffCampusMap[scope.row.isOffCampus] }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="emergencyContact" label="紧急联系人" align="center" />
-                <el-table-column prop="destination" label="去向" align="center" />
-                <el-table-column prop="reason" label="请假事由" align="center" show-overflow-tooltip />
-                <el-table-column prop="applicant" label="申请人" align="center" />
+                <el-table-column prop="emergencyContact" label="紧急联系人" align="center" :show-overflow-tooltip="true" />
+                <el-table-column prop="destination" label="去向" align="center" :show-overflow-tooltip="true" />
+                <el-table-column prop="reason" label="请假事由" align="center" :show-overflow-tooltip="true" />
+                <el-table-column prop="applicant" label="申请人" align="center" :show-overflow-tooltip="true" />
                 <el-table-column prop="approvalStatus" label="审批状态" align="center">
                     <template #default="scope">
                         {{ approvalStatusMap[scope.row.approvalStatus] }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="approvalTime" label="审批时间" align="center">
+                <el-table-column prop="approvalTime" label="审批时间" align="center" :show-overflow-tooltip="true">
                     <template #default="scope">
                         {{ formatDate(scope.row.approvalTime) }}
                     </template>

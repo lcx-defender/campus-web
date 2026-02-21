@@ -2,6 +2,7 @@ import request from '@/utils/request.js';
 import { removeToken } from '@/utils/token.js';
 // 登录方法
 export const loginByUsername = (loginform) => {
+  console.log('loginform', loginform);
   return request.post('/loginByUsername', loginform);
 }
 

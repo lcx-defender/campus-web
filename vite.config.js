@@ -32,7 +32,7 @@ export default defineConfig({
         rewrite: (p) => p.replace(/^\/dev-api/, '')
       },
       '/prod-api': {
-        target: 'http://14.103.226.91:8088',
+        target: 'http://your_ip:8088',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/prod-api/, '')
       }
