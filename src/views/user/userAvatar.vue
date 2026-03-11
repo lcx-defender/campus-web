@@ -8,6 +8,7 @@
                     <vue-cropper ref="cropper" :img="options.img" :info="true" :autoCrop="options.autoCrop"
                         :autoCropWidth="options.autoCropWidth" :autoCropHeight="options.autoCropHeight"
                         :fixedBox="options.fixedBox" :outputType="options.outputType" @realTime="realTime"
+                        @imgLoad="handleImgLoad"
                         v-if="visible" />
                 </el-col>
                 <el-col :xs="24" :md="12" :style="{ height: '350px' }">
@@ -65,6 +66,7 @@ const defaultAvatar = "https://greet-freshman.oss-cn-shanghai.aliyuncs.com/defau
 const open = ref(false);
 const visible = ref(false);
 const title = ref("修改头像");
+const localBlobUrl = ref('');
 
 //图片裁剪数据
 const options = reactive({
@@ -81,10 +83,47 @@ const options = reactive({
 /** 编辑头像 */
 function editCropper() {
     open.value = true;
+    syncCurrentAvatar();
 }
+
+async function syncCurrentAvatar() {
+    const url = userStore.userInfo?.avatar || defaultAvatar;
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+        options.img = url;
+        return;
+    }
+    try {
+        // 尝试代理抓取转成本地blob以此规避直接加载报 canvas 跨域的错误（附加随机数避免缓存污染）
+        const res = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + new Date().getTime(), { 
+            mode: 'cors',
+            cache: 'no-cache'
+        });
+        if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            if (localBlobUrl.value) {
+                URL.revokeObjectURL(localBlobUrl.value);
+            }
+            localBlobUrl.value = blobUrl;
+            options.img = blobUrl;
+        } else {
+            options.img = url;
+        }
+    } catch (e) {
+        console.warn("无法 fetch 跨域图片，降级回直接赋值", e);
+        options.img = url;
+    }
+}
+
 /** 打开弹出层结束时的回调 */
 function modalOpened() {
     visible.value = true;
+}
+
+function handleImgLoad(status) {
+    if (status === 'error') {
+        ElMessage.warning('当前头像地址无法被裁剪器读取，请重新选择本地图片后上传');
+    }
 }
 /** 覆盖默认上传行为 */
 function requestUpload() { }
@@ -119,7 +158,12 @@ function beforeUpload(file) {
     }
     // 创建 blob URL
     try {
+        if (localBlobUrl.value) {
+            URL.revokeObjectURL(localBlobUrl.value);
+            localBlobUrl.value = '';
+        }
         const blobUrl = URL.createObjectURL(file);
+        localBlobUrl.value = blobUrl;
         console.log("生成的blob URL:", blobUrl);
         options.img = blobUrl;
         options.filename = file.name;
@@ -138,6 +182,10 @@ function beforeUpload(file) {
 }
 /** 上传头像 */
 function uploadImg() {
+    if (!cropper.value) {
+        ElMessage.error('裁剪器尚未初始化，请稍后重试');
+        return;
+    }
     cropper.value.getCropBlob(data => {
         let formData = new FormData();
         // 使用原始文件名，但确保添加正确的扩展名
@@ -157,10 +205,10 @@ function uploadImg() {
             ElMessage.success("头像上传成功");
             visible.value = false;
 
-            // 清理之前的 blob URL
-                if (options.img && options.img.startsWith('blob:')) {
-                    URL.revokeObjectURL(options.img);
-                }
+            if (localBlobUrl.value) {
+                URL.revokeObjectURL(localBlobUrl.value);
+                localBlobUrl.value = '';
+            }
         });
     });
 }
@@ -170,19 +218,20 @@ function realTime(data) {
 }
 /** 关闭窗口 */
 function closeDialog() {
-    // 清理当前的 blob URL
-    if (options.img && options.img.startsWith('blob:')) {
-        URL.revokeObjectURL(options.img);
+    if (localBlobUrl.value) {
+        URL.revokeObjectURL(localBlobUrl.value);
+        localBlobUrl.value = '';
     }
-    options.img = userStore.userInfo.avatar || defaultAvatar;
+    options.img = userStore.userInfo?.avatar || defaultAvatar;
     options.visible = false;
     visible.value = false;
 }
 
 // 在组件卸载前清理 blob URL
 onBeforeUnmount(() => {
-    if (options.img && options.img.startsWith('blob:')) {
-        URL.revokeObjectURL(options.img);
+    if (localBlobUrl.value) {
+        URL.revokeObjectURL(localBlobUrl.value);
+        localBlobUrl.value = '';
     }
 });
 </script>
